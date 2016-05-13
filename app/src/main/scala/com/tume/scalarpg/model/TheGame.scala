@@ -2,12 +2,15 @@ package com.tume.scalarpg.model
 
 import android.graphics.{Paint, Canvas}
 import android.util.Log
+import com.tume.scalarpg.Game
+import com.tume.scalarpg.gui.UIView
+import com.tume.scalarpg.gui.event.UIEvent
 import com.tume.scalarpg.util.{Input, DisplayUtils, Bitmaps}
 
 /**
   * Created by tume on 5/11/16.
   */
-class Game {
+class TheGame extends Game {
 
   var floor = Map[(Int, Int), Tile]()
   var floorWidth, floorHeight = 0
@@ -59,16 +62,11 @@ class Game {
     for (y <- 0 until floorWidth) {
       canvas.drawLine(0, y * Tile.size * scaling, floorWidth * Tile.size * scaling, y * Tile.size * scaling, gridPaint)
     }
-
-    val testPaint = new Paint()
-    testPaint.setColor(0xffff5555)
-    testPaint.setStrokeWidth(15f)
-    if (Input.touchLocation.isDefined) {
-      canvas.drawCircle(Input.touchX.get, Input.touchY.get, 25f, testPaint)
-      if (Input.down) {
-        canvas.drawCircle(Input.touchX.get, Input.touchY.get, 155f, testPaint)
-      }
-    }
   }
 
+  override def views: Seq[UIView] = Vector(new GameUI())
+
+  override def onUIEvent(event: UIEvent): Unit = {
+    Log.d("TAG", event.view.get + " " + event.id.get)
+  }
 }

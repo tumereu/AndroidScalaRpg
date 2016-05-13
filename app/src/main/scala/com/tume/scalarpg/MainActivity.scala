@@ -4,12 +4,14 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.{WindowManager, Window}
-import com.tume.scalarpg.model.Game
+import com.tume.scalarpg.gui.UISystem
+import com.tume.scalarpg.model.{GameUI, TheGame}
 import com.tume.scalarpg.util.{DisplayUtils, Bitmaps}
 
 class MainActivity() extends AppCompatActivity {
 
   var game: Game = null
+  var ui: UISystem = null
   var loop: GameLoop = null
 
   override protected def onCreate(savedInstance: Bundle): Unit = {
@@ -26,10 +28,14 @@ class MainActivity() extends AppCompatActivity {
     Bitmaps.context = Some(this)
     DisplayUtils.init(this)
 
-    game = new Game()
-    game.createFloor()
+    game = new TheGame()
 
-    loop = new GameLoop(game, findViewById(R.id.gameView).asInstanceOf[GameView])
+    ui = new UISystem()
+    ui.init(game.views, game)
+
+    game.asInstanceOf[TheGame].createFloor()
+
+    loop = new GameLoop(game, ui, findViewById(R.id.gameView).asInstanceOf[GameView])
   }
 
   override def onPause(): Unit = {

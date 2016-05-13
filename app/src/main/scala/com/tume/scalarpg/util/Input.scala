@@ -20,9 +20,9 @@ object Input {
   def touchX : Option[Float] = if (touchLocation.isDefined) Some(touchLocation.get._1) else None
   def touchY : Option[Float] = if (touchLocation.isDefined) Some(touchLocation.get._2) else None
   def lastTouchLocation = lastEventLoc
-  def down = touchedThisFrame
-  def up = upThisFrame
-  def touch = touchLocation.isDefined
+  def touchStartedThisFrame = touchedThisFrame
+  def touchEndedThisFrame = upThisFrame
+  def isTouching = touchLocation.isDefined
 
   def addEvent(motionEvent: MotionEvent): Unit = {
     // Add the new event in a new thread so we don't freeze the main thread
@@ -74,7 +74,7 @@ object Input {
   }
 
   def isTouchInside(x: Float, y: Float, width: Float, height: Float): Boolean = {
-    if (!touch) {
+    if (!isTouching) {
       false
     } else {
       touchX.get >= x && touchX.get <= x + width && touchY.get >= y && touchY.get <= y + height
