@@ -23,5 +23,5 @@ object Bitmaps {
     decoded(resource)
   }
 
-  def random(array: Array[Int]): Int = array((Math.random() * array.length).toInt)
+  def random(array: Array[Int]): Bitmap = get(array((Math.random() * array.length).toInt))
 }

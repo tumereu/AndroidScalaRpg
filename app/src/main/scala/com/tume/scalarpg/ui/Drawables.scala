@@ -11,5 +11,8 @@ object Drawables {
   val floorsSandStone = Array[Int](floor_sand_stone0,floor_sand_stone1,floor_sand_stone2,
     floor_sand_stone3,floor_sand_stone4,floor_sand_stone5,floor_sand_stone6,floor_sand_stone7)
 
+  val wallsStoneBrown = Array[Int](stone2_brown0, stone2_brown1, stone2_brown2, stone2_brown3)
+
+  def random(array: Array[Int]): Int = array((Math.random() * array.length).toInt)
 
 }

@@ -39,7 +39,11 @@ class UISystem {
 
   def render(canvas: Canvas): Unit = {
     for (cmp <- activeComponents) {
+      canvas.save()
+      canvas.translate(cmp.x, cmp.y)
+      canvas.clipRect(0, 0, cmp.width, cmp.height)
       cmp.render(canvas)
+      canvas.restore()
     }
   }
 
@@ -55,5 +59,7 @@ class UISystem {
       cmp.toggleVisibility(true)
     }
   }
+
+  def findComponent(id: String) = this.components.values.flatten.find(_.id.contains(id))
 
 }

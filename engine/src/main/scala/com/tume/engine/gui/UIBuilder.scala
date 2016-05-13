@@ -21,6 +21,16 @@ class UIBuilder(val uiComponent: UIComponent) {
     this
   }
 
+  def absHeight(float: Float) : UIBuilder = {
+    uiComponent.height = (float * DisplayUtils.screenHeight).toInt
+    this
+  }
+
+  def absWidth(float: Float) : UIBuilder = {
+    uiComponent.width = (float * DisplayUtils.screenWidth).toInt
+    this
+  }
+
   def padding(int: Int) : UIBuilder = {
     padding = int
     this
@@ -34,7 +44,17 @@ class UIBuilder(val uiComponent: UIComponent) {
   }
 
   def y(float: Float) : UIBuilder = {
-    uiComponent.x = toPixels(float)
+    uiComponent.y = toPixels(float)
+    this
+  }
+
+  def ax(float: Float) : UIBuilder = {
+    uiComponent.x = (float * DisplayUtils.screenWidth).toInt
+    this
+  }
+
+  def ay(float: Float) : UIBuilder = {
+    uiComponent.y = (float * DisplayUtils.screenHeight).toInt
     this
   }
 
@@ -99,6 +119,24 @@ class UIBuilder(val uiComponent: UIComponent) {
 
   def id(string: String) : UIBuilder = {
     uiComponent.id = Some(string)
+    this
+  }
+
+  def pad() : UIBuilder = {
+    uiComponent.x += padding
+    uiComponent.y += padding
+    uiComponent.width -= padding * 2
+    uiComponent.height -= padding * 2
+    this
+  }
+
+  def color1(int: Int) : UIBuilder = {
+    uiComponent.color1 = int
+    this
+  }
+
+  def color2(int: Int) : UIBuilder = {
+    uiComponent.color2 = int
     this
   }
 

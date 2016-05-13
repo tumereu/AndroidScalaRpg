@@ -36,6 +36,7 @@ abstract class GameActivity extends AppCompatActivity {
 
     ui = new UISystem()
     ui.init(game.views, game)
+    game.uiSystem = ui
 
     game.init()
 

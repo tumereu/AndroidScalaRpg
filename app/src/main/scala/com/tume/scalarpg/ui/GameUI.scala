@@ -1,6 +1,6 @@
 package com.tume.scalarpg.ui
 
-import com.tume.engine.gui.{UIBuilder, UIButton, UIView}
+import com.tume.engine.gui.{UIProgressBar, UIBuilder, UIButton, UIView}
 import com.tume.scalarpg.R
 
 import scala.collection.mutable
@@ -13,7 +13,8 @@ class GameUI extends UIView {
 
   override def build: Seq[UIBuilder] = {
     var view = mutable.Buffer[UIBuilder]()
-    var moveRight = UIBuilder(new UIButton).size(0.15f).drawable(R.mipmap.ic_arrow_right).right(0.0f).id("moveRight")
+    // Movement buttons
+    var moveRight = UIBuilder(new UIButton).size(0.15f).drawable(R.mipmap.ic_arrow_right).right().id("moveRight")
     val moveDown = UIBuilder(new UIButton).size(0.15f).drawable(R.mipmap.ic_arrow_down).bottom().leftOf(moveRight).id("moveDown")
     var moveLeft = UIBuilder(new UIButton).size(0.15f).drawable(R.mipmap.ic_arrow_left).leftOf(moveDown).id("moveLeft")
     moveRight = moveRight.above(moveDown)
@@ -23,6 +24,12 @@ class GameUI extends UIView {
     view += moveLeft
     view += moveUp
     view += moveDown
+    // Bars
+    val timeBar = UIBuilder(new UIProgressBar()).width(1f).height(0.05f).left().top().pad().color1(0xff00b7eb).color2(0xff00ffff).id("timeBar")
+    view += timeBar
+    val gameCanvas = UIBuilder(new GameCanvas()).width(1f).absHeight(0.55f).left().below(timeBar).id("gameCanvas")
+    view += gameCanvas
+
     view
   }
 }

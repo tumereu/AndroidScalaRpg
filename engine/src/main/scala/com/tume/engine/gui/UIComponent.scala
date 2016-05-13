@@ -1,8 +1,8 @@
 package com.tume.engine.gui
 
-import android.graphics.{Canvas, Paint}
+import android.graphics.{Bitmap, Canvas, Paint}
 import com.tume.engine.gui.event.{UIEvent, UIEventListener}
-import com.tume.engine.util.{DisplayUtils, Input}
+import com.tume.engine.util.{Bitmaps, DisplayUtils, Input}
 
 /**
   * Created by tume on 5/12/16.
@@ -16,13 +16,21 @@ abstract class UIComponent {
   var view: Option[String] = None
   var listener: Option[UIEventListener] = None
 
+  var color1, color2: Int = 0
+
   protected var enabled = true
   protected var visible = true
+  protected var bitmap: Option[Bitmap] = None
 
   var x, y, width, height = 0
 
   def render(canvas: Canvas) : Unit
-  def init()
+  def init(): Unit = {
+    bitmap = drawable match {
+      case -1 => None
+      case x => Some(Bitmaps.get(x))
+    }
+  }
 
   def state : UIState = {
     if (!visible) {
@@ -87,10 +95,12 @@ object UIFocus {
 object UITheme {
   val bitmapPaint = new Paint()
 
-  val borderPaint = create(0xff999999, Paint.Style.STROKE, 2 * DisplayUtils.scale)
+  val borderPaint = create(0xff999999, Paint.Style.FILL, 2 * DisplayUtils.scale)
 
   val fillPaintNormal = create(0xffAA6600, Paint.Style.FILL)
   val fillPaintPressed = create(0xff996699, Paint.Style.FILL)
+
+  val background = create(0xff666666, Paint.Style.FILL)
 
   private def create(color: Int, style: Paint.Style = Paint.Style.FILL_AND_STROKE, strokeWidth: Float = DisplayUtils.scale, antialias: Boolean = true) : Paint = {
     val paint = new Paint()

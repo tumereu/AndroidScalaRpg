@@ -16,6 +16,8 @@ class Tile(val x: Int, val y: Int, floorResource: Int) {
     canvas.drawBitmap(bitmap, 0, 0, new Paint())
   }
 
+  def location = (x, y)
+
   def renderObjects(canvas: Canvas): Unit = {
     for (o <- this.objects) {
       o.render(canvas)
@@ -33,6 +35,8 @@ class Tile(val x: Int, val y: Int, floorResource: Int) {
       tileObject.currentTile = None
     }
   }
+
+  def canBeEntered = this.objects.find(!_.isPassable).isEmpty
 
 }
 object Tile {
