@@ -1,7 +1,7 @@
-package com.tume.scalarpg.gui
+package com.tume.engine.gui
 
 import android.graphics.Canvas
-import com.tume.scalarpg.gui.event.UIEventListener
+import com.tume.engine.gui.event.UIEventListener
 
 /**
   * Created by tume on 5/12/16.
@@ -26,8 +26,8 @@ class UISystem {
       cmp.toggleVisibility(false)
       cmp.init()
     }
-    if (views.length > 0) {
-      this.show(views(0).getClass.toString)
+    if (!views.isEmpty) {
+      this.show(views.head.name)
     }
   }
 

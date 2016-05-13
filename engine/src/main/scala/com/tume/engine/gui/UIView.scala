@@ -1,4 +1,4 @@
-package com.tume.scalarpg.gui
+package com.tume.engine.gui
 
 /**
   * Created by tume on 5/12/16.

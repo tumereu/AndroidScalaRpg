@@ -1,11 +1,13 @@
-package com.tume.scalarpg.model
+package com.tume.scalarpg
 
-import android.graphics.{Paint, Canvas}
+import android.graphics.{Canvas, Paint}
 import android.util.Log
-import com.tume.scalarpg.Game
-import com.tume.scalarpg.gui.UIView
-import com.tume.scalarpg.gui.event.UIEvent
-import com.tume.scalarpg.util.{Input, DisplayUtils, Bitmaps}
+import com.tume.engine.Game
+import com.tume.engine.gui.UIView
+import com.tume.engine.gui.event.UIEvent
+import com.tume.engine.util.{Bitmaps, DisplayUtils}
+import com.tume.scalarpg.model.{Creature, Tile}
+import com.tume.scalarpg.ui.{Drawables, GameUI}
 
 /**
   * Created by tume on 5/11/16.
@@ -20,13 +22,13 @@ class TheGame extends Game {
     floorWidth = 6
     floorHeight = 6
     for (x <- 0 until floorWidth; y <- 0 until floorHeight) {
-      floor += (x, y) -> new Tile(x, y, Bitmaps.random(Bitmaps.floorsSandStone))
+      floor += (x, y) -> new Tile(x, y, Bitmaps.random(Drawables.floorsSandStone))
     }
     floor((3,4)).addObject(new Creature())
   }
 
   def update(delta: Double): Unit = {
-    Input.onFrameChange()
+
   }
 
   def render(canvas: Canvas): Unit = {
@@ -68,5 +70,9 @@ class TheGame extends Game {
 
   override def onUIEvent(event: UIEvent): Unit = {
     Log.d("TAG", event.view.get + " " + event.id.get)
+  }
+
+  override def init(): Unit = {
+    createFloor()
   }
 }

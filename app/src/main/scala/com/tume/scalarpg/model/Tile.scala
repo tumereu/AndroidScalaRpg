@@ -1,7 +1,7 @@
 package com.tume.scalarpg.model
 
 import android.graphics.{Paint, Canvas}
-import com.tume.scalarpg.util.{DisplayUtils, Bitmaps}
+import com.tume.engine.util.{DisplayUtils, Bitmaps}
 
 /**
   * Created by tume on 5/11/16.

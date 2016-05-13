@@ -1,8 +1,9 @@
-package com.tume.scalarpg
+package com.tume.engine
 
 import android.graphics.Canvas
 import android.util.Log
-import com.tume.scalarpg.gui.UISystem
+import com.tume.engine.gui.UISystem
+import com.tume.engine.util.Input
 
 /**
   * Created by tume on 5/11/16.
@@ -25,8 +26,7 @@ class GameLoop(val game: Game, val ui: UISystem, val view: GameView) extends Run
           val frameStart = System.currentTimeMillis()
           var framesSkipped = 0
           val fixedDelta = 1D / FPS
-          ui.update(fixedDelta)
-          game.update(fixedDelta)
+          update(fixedDelta)
           if (canvas != null) {
             game.render(canvas)
             ui.render(canvas)
@@ -37,8 +37,7 @@ class GameLoop(val game: Game, val ui: UISystem, val view: GameView) extends Run
             Thread.sleep(sleepTime)
           }
           while (sleepTime + framesSkipped * FRAME_LENGTH < 0 && framesSkipped < MAX_SKIP) {
-            ui.update(fixedDelta)
-            game.update(fixedDelta)
+            update(fixedDelta)
             framesSkipped += 1
           }
         }
@@ -49,6 +48,12 @@ class GameLoop(val game: Game, val ui: UISystem, val view: GameView) extends Run
       }
     }
     Log.d("GameLoopInfo", "Stopping game loop..")
+  }
+
+  private def update(delta: Double): Unit = {
+    Input.onFrameChange()
+    ui.update(delta)
+    game.update(delta)
   }
 
   def pause(): Unit = {

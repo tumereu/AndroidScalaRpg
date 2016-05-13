@@ -1,15 +1,14 @@
-package com.tume.scalarpg.gui
+package com.tume.engine.gui
 
-import android.graphics.{Paint, Canvas}
-import com.tume.scalarpg.gui.event.{UIEvent, UIEventListener}
-import com.tume.scalarpg.util.{DisplayUtils, Input}
+import android.graphics.{Canvas, Paint}
+import com.tume.engine.gui.event.{UIEvent, UIEventListener}
+import com.tume.engine.util.{DisplayUtils, Input}
 
 /**
   * Created by tume on 5/12/16.
   */
 abstract class UIComponent {
-
-  import com.tume.scalarpg.gui.UIState._
+  import com.tume.engine.gui.UIState._
   protected var innerState = Normal
 
   var drawable = -1
@@ -52,8 +51,10 @@ abstract class UIComponent {
     this.enabled = boolean
   }
 
+  def interactable = visible && enabled
+
   def update(delta: Double): Unit = {
-    if (Input.isTouchInside(x, y, width, height)) {
+    if (Input.isTouchInside(x, y, width, height) && interactable) {
       this.innerState = Pressed
       UIFocus.currentFocus = Some(this)
       if (Input.touchStartedThisFrame) {
@@ -65,7 +66,6 @@ abstract class UIComponent {
   }
 
   def onTouch(): Unit = {
-
   }
 
   def throwEvent(event: UIEvent): Unit = {

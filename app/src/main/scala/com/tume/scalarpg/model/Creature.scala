@@ -1,7 +1,7 @@
 package com.tume.scalarpg.model
 
+import com.tume.engine.util.Bitmaps
 import com.tume.scalarpg.R
-import com.tume.scalarpg.util.Bitmaps
 
 /**
   * Created by tume on 5/12/16.

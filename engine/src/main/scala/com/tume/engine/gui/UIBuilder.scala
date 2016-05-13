@@ -1,6 +1,6 @@
-package com.tume.scalarpg.gui
+package com.tume.engine.gui
 
-import com.tume.scalarpg.util.DisplayUtils
+import com.tume.engine.util.DisplayUtils
 
 /**
   * Created by tume on 5/12/16.

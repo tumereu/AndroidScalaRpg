@@ -1,14 +1,15 @@
-package com.tume.scalarpg.gui
+package com.tume.engine.gui
 
-import android.graphics.{Paint, Bitmap, Canvas}
-import com.tume.scalarpg.gui.event.ButtonEvent
-import com.tume.scalarpg.util.{Bitmaps, DisplayUtils}
-import com.tume.scalarpg.gui.UIState._
+import android.graphics.{Bitmap, Canvas}
+import com.tume.engine.gui.event.ButtonEvent
+import com.tume.engine.util.{DisplayUtils, Bitmaps}
 
 /**
   * Created by tume on 5/12/16.
   */
 class UIButton extends UIComponent {
+
+  import com.tume.engine.gui.UIState._
 
   private var bitmap: Option[Bitmap] = None
 

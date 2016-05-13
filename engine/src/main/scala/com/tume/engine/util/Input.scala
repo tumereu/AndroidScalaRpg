@@ -1,4 +1,4 @@
-package com.tume.scalarpg.util
+package com.tume.engine.util
 
 import android.util.Log
 import android.view.MotionEvent

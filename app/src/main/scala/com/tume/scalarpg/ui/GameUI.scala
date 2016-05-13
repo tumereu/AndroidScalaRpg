@@ -1,7 +1,7 @@
-package com.tume.scalarpg.model
+package com.tume.scalarpg.ui
 
+import com.tume.engine.gui.{UIBuilder, UIButton, UIView}
 import com.tume.scalarpg.R
-import com.tume.scalarpg.gui.{UIButton, UIBuilder, UIView}
 
 import scala.collection.mutable
 

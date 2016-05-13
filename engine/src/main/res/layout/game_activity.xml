@@ -7,9 +7,9 @@
     android:paddingRight="0dp"
     android:paddingTop="0dp">
 
-    <com.tume.scalarpg.GameView
+    <com.tume.engine.GameView
         android:id="@+id/gameView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </com.tume.scalarpg.GameView>
+    </com.tume.engine.GameView>
 </RelativeLayout>

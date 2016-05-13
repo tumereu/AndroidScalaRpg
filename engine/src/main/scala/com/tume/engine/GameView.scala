@@ -1,10 +1,9 @@
-package com.tume.scalarpg
+package com.tume.engine
 
 import android.content.Context
-import android.graphics.{BitmapFactory, Paint, Canvas}
 import android.util.AttributeSet
-import android.view.{MotionEvent, SurfaceView, View}
-import com.tume.scalarpg.util.Input
+import android.view.{MotionEvent, SurfaceView}
+import com.tume.engine.util.Input
 
 class GameView(ctx: Context, atSet: AttributeSet) extends SurfaceView(ctx, atSet) {
   val surfaceHolder = getHolder
