@@ -122,6 +122,8 @@ class UIBuilder(val uiComponent: UIComponent) {
     this
   }
 
+  def pad(paa: Int) : UIBuilder = padding(paa).pad()
+
   def pad() : UIBuilder = {
     uiComponent.x += padding
     uiComponent.y += padding
@@ -147,6 +149,6 @@ object UIBuilder {
   def apply(uIComponent: UIComponent) : UIBuilder = new UIBuilder(uIComponent)
 }
 object UIBuilderSettings {
-  var padding = (DisplayUtils.scale * 1).toInt
+  var padding = 0
 }
 

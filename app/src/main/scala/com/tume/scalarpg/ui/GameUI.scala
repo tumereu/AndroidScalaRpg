@@ -1,6 +1,8 @@
 package com.tume.scalarpg.ui
 
+import android.util.Log
 import com.tume.engine.gui.{UIProgressBar, UIBuilder, UIButton, UIView}
+import com.tume.engine.util.DisplayUtils
 import com.tume.scalarpg.R
 
 import scala.collection.mutable
@@ -31,6 +33,7 @@ class GameUI extends UIView {
     val manaBar = UIBuilder(new UIProgressBar()).absWidth(0.3f).height(0.12f).rightOf(healthBar).below(gameCanvas).color1(0xff080899).color2(0xff2222ff).id("manaBar")
     view += manaBar.pad()
     view += healthBar.pad()
+    Log.d("TAG", healthBar.resolve.width + " / " + manaBar.resolve.width)
     view
   }
 }

@@ -2,13 +2,16 @@ package com.tume.scalarpg
 
 import android.graphics.{Canvas, Paint}
 import android.util.Log
+import com.tume.engine.effect.FadingTextObject
 import com.tume.scalarpg.model.Direction._
 import com.tume.engine.Game
 import com.tume.engine.gui.{UIProgressBar, UIView}
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
 import com.tume.engine.util.{Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
-import com.tume.scalarpg.ui.{GameCanvas, Drawables, GameUI}
+import com.tume.scalarpg.model.property.Damage
+import com.tume.scalarpg.ui.{Colors, GameCanvas, Drawables, GameUI}
+import com.tume.engine.effect._
 
 /**
   * Created by tume on 5/11/16.
@@ -24,6 +27,7 @@ class TheGame extends Game {
   var enemies = Vector.empty[Enemy]
 
   var healthBar, manaBar : UIProgressBar = null
+  var gameCanvas : GameCanvas = null
 
   def createFloor(): Unit = {
     floor = Map[(Int, Int), Tile]()
@@ -37,7 +41,7 @@ class TheGame extends Game {
     floor((1, 1)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
     floor((2, 1)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
     floor((1, 2)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
-    for (i <- 1 to 3) {
+    for (i <- 1 to 1) {
       spawnEnemy()
     }
   }
@@ -63,6 +67,13 @@ class TheGame extends Game {
       e.attackCreature(player)
     }
     this.tryToSpawnEnemy()
+  }
+
+  def addEnemyToPlayerDamageObject(damage: Damage, loc: Tile): Unit = {
+    val coords = this.gameCanvas.coordinatesForLocation(loc)
+    val effect = new HomingTextObject(Colors.dmgPaint(damage), damage.cleanAmount, coords,
+      gameCanvas.coordinatesForLocation(player.currentTile.get), 15f * DisplayUtils.scale, (0.7f + Math.random() * 0.3f).toFloat)
+    effectSystem.add(effect)
   }
 
   def spawnEnemy(): Unit = {
@@ -101,8 +112,10 @@ class TheGame extends Game {
 
   override def init(): Unit = {
     createFloor()
-    findUIComponent("gameCanvas").get.asInstanceOf[GameCanvas].game = Some(this)
+    gameCanvas = findUIComponent("gameCanvas").get.asInstanceOf[GameCanvas]
     healthBar = findUIComponent("healthBar").get.asInstanceOf[UIProgressBar]
     manaBar = findUIComponent("manaBar").get.asInstanceOf[UIProgressBar]
+
+    gameCanvas.game = Some(this)
   }
 }

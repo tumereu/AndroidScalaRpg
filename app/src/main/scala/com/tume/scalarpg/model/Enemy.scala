@@ -16,7 +16,9 @@ class Enemy(game: TheGame) extends Creature(game) {
   this.bitmap = Some(Bitmaps.get(R.drawable.crocodile))
 
   def attackCreature(creature: Creature): Unit = {
+    val dmg = calculateBasicAttackDamage
     creature.takeDamage(this.calculateBasicAttackDamage)
+    game.addEnemyToPlayerDamageObject(dmg, this.currentTile.get)
   }
 
 }

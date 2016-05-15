@@ -60,6 +60,7 @@ object Input {
         updatePointer(event)
       }
       case MotionEvent.ACTION_MOVE => updatePointer(event)
+      case _ =>
     }
     lastEventLoc = (event.getX, event.getY)
   }

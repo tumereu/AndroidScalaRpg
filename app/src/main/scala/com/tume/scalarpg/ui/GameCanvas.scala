@@ -19,12 +19,6 @@ class GameCanvas extends UIComponent {
       canvas.drawColor(0xFF000000)
 
       // Scale the map so it fits on the whole screen
-      val mapWidth = g.floorWidth * Tile.size
-      val mapHeight = g.floorHeight * Tile.size
-
-      val scaling = Math.min(width.toFloat / mapWidth, height.toFloat / mapHeight)
-      val translateX = width.toFloat / 2 - (mapWidth * scaling / 2)
-      val translateY = height.toFloat / 2 - (mapHeight * scaling / 2)
       canvas.translate(translateX, translateY)
       canvas.scale(scaling, scaling)
       // Draw the floor
@@ -44,4 +38,16 @@ class GameCanvas extends UIComponent {
       canvas.translate(-translateX, -translateY)
     }
   }
+
+  def mapWidth = game.get.floorWidth * Tile.size
+  def mapHeight = game.get.floorHeight * Tile.size
+  def scaling = Math.min(width.toFloat / (game.get.floorWidth * Tile.size), height.toFloat / (game.get.floorHeight * Tile.size))
+  def translateX = width.toFloat / 2 - (mapWidth * scaling / 2)
+  def translateY = height.toFloat / 2 - (mapHeight * scaling / 2)
+
+  def coordinatesForLocation(loc: (Int, Int)) : (Float, Float) = {
+    (x + translateX + Tile.size * (loc._1 + 0.5f) * scaling, y + translateY + Tile.size * (loc._2 + 0.5f) * scaling)
+  }
+
+  def coordinatesForLocation(tile: Tile) : (Float, Float) = coordinatesForLocation((tile.x, tile.y))
 }

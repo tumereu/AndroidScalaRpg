@@ -8,7 +8,10 @@ import com.tume.engine.util.Input
 /**
   * Created by tume on 5/11/16.
   */
-class GameLoop(val game: Game, val ui: UISystem, val view: GameView) extends Runnable {
+class GameLoop(val game: Game, val view: GameView) extends Runnable {
+
+  val ui = game.uiSystem
+  val effects = game.effectSystem
 
   val FPS = 50
   val MAX_SKIP = 5
@@ -30,6 +33,7 @@ class GameLoop(val game: Game, val ui: UISystem, val view: GameView) extends Run
           if (canvas != null) {
             game.render(canvas)
             ui.render(canvas)
+            effects.render(canvas)
           }
           val diff = System.currentTimeMillis() - frameStart
           val sleepTime = FRAME_LENGTH - diff
@@ -54,6 +58,7 @@ class GameLoop(val game: Game, val ui: UISystem, val view: GameView) extends Run
     Input.onFrameChange()
     ui.update(delta)
     game.update(delta)
+    effects.update(delta)
   }
 
   def pause(): Unit = {

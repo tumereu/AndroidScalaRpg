@@ -1,6 +1,7 @@
 package com.tume.engine
 
 import android.graphics.Canvas
+import com.tume.engine.effect.EffectSystem
 import com.tume.engine.gui.{UISystem, UIView}
 import com.tume.engine.gui.event.{UIEvent, UIEventListener}
 
@@ -10,6 +11,7 @@ import com.tume.engine.gui.event.{UIEvent, UIEventListener}
 trait Game extends UIEventListener {
 
   var uiSystem : UISystem = null
+  var effectSystem: EffectSystem = null
 
   def init()
 

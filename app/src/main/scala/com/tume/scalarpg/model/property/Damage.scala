@@ -7,4 +7,6 @@ import com.tume.scalarpg.model.property.Element._
   */
 class Damage(val amount: Double, val element: Element) {
 
+  def cleanAmount = Math.max(1, Math.round(amount)).toString
+
 }

@@ -29,7 +29,6 @@ class Creature(val theGame: TheGame) extends TileObject {
   }
 
   def takeDamage(damage: Damage) = {
-    Log.d("TAG", "" + this.health)
     this.health -= damage.amount
     if (health < 0) {
       health = 0
