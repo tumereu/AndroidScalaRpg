@@ -2,15 +2,14 @@ package com.tume.scalarpg
 
 import android.graphics.{Canvas, Paint}
 import android.util.Log
-import com.tume.engine.effect.FadingTextObject
 import com.tume.scalarpg.model.Direction._
 import com.tume.engine.Game
-import com.tume.engine.gui.{UITheme, UIProgressBar, UIView}
+import com.tume.engine.gui.{UIButton, UITheme, UIProgressBar, UIView}
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
 import com.tume.engine.util.{Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
-import com.tume.scalarpg.model.potion.{Potion, HealthPotion}
-import com.tume.scalarpg.model.property.Damage
+import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, HealthPotion}
+import com.tume.scalarpg.model.property.{Healing, Damage}
 import com.tume.scalarpg.ui.{Colors, GameCanvas, Drawables, GameUI}
 import com.tume.engine.effect._
 
@@ -28,6 +27,8 @@ class TheGame extends Game {
   var enemies = Vector.empty[Enemy]
 
   var healthBar, manaBar, xpBar : UIProgressBar = null
+  var healthPotion, manaPotion, xpPotion : UIButton = null
+
   var gameCanvas : GameCanvas = null
 
   def createFloor(): Unit = {
@@ -53,6 +54,14 @@ class TheGame extends Game {
     healthBar.updateProgress(player.health.toInt, player.maxHealth.toInt)
     manaBar.updateProgress(player.mana.toInt, player.maxMana.toInt)
     xpBar.updateProgress(player.xp, player.reqXp)
+
+    healthPotion.cornerText = player.potionAmount(new HealthPotion().getClass).toString
+    healthPotion.enabled = player.potionAmount(new HealthPotion().getClass) > 0
+    manaPotion.cornerText = player.potionAmount(new ManaPotion().getClass).toString
+    manaPotion.enabled = player.potionAmount(new ManaPotion().getClass) > 0
+    xpPotion.cornerText = player.potionAmount(new ExperiencePotion().getClass).toString
+    xpPotion.enabled = player.potionAmount(new ExperiencePotion().getClass) > 0
+
 
     player.update(delta)
   }
@@ -97,6 +106,12 @@ class TheGame extends Game {
 
   def addPlayerToEnemyDamageObject(damage: Damage, loc: Tile): Unit = {
     val effect = new FloatingTextObject(Colors.dmgPaint(damage), damage.cleanAmount, gameCanvas.coordinatesForLocation(loc),
+      1f, 1f, DisplayUtils.scale * -90f)
+    effectSystem.add(effect)
+  }
+
+  def addHealingObject(healing: Healing, loc: Tile): Unit = {
+    val effect = new FloatingTextObject(Colors.healPaint(healing), healing.cleanAmount, gameCanvas.coordinatesForLocation(loc),
       1f, 1f, DisplayUtils.scale * -90f)
     effectSystem.add(effect)
   }
@@ -147,6 +162,9 @@ class TheGame extends Game {
           case "moveLeft" => player.move(Left)
           case "moveUp" => player.move(Up)
           case "moveDown" => player.move(Down)
+          case "healthPotion" => player.quaffPotion(new HealthPotion().getClass)
+          case "manaPotion" => player.quaffPotion(new ManaPotion().getClass)
+          case "xpPotion" => player.quaffPotion(new ExperiencePotion().getClass)
           case _ =>
         }
       }
@@ -159,6 +177,9 @@ class TheGame extends Game {
     healthBar = findUIComponent("healthBar").get.asInstanceOf[UIProgressBar]
     manaBar = findUIComponent("manaBar").get.asInstanceOf[UIProgressBar]
     xpBar = findUIComponent("xpBar").get.asInstanceOf[UIProgressBar]
+    healthPotion = findUIComponent("healthPotion").get.asInstanceOf[UIButton]
+    manaPotion = findUIComponent("manaPotion").get.asInstanceOf[UIButton]
+    xpPotion = findUIComponent("xpPotion").get.asInstanceOf[UIButton]
 
     gameCanvas.game = Some(this)
   }

@@ -2,12 +2,12 @@ package com.tume.scalarpg.model.potion
 
 import android.graphics.Paint
 import com.tume.scalarpg.TheGame
-import com.tume.scalarpg.model.TileObject
+import com.tume.scalarpg.model.{Hero, TileObject}
 
 /**
   * Created by tume on 5/17/16.
   */
-class Potion extends TileObject {
+abstract class Potion extends TileObject {
 
   private val startingRounds = 3
   private var roundsLeft = startingRounds
@@ -29,6 +29,8 @@ class Potion extends TileObject {
       game.removeObject(this)
     }
   }
+
+  def quaff(player: Hero)
 
 }
 object Potion {

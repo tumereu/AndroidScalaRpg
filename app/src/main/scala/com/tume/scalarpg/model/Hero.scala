@@ -2,6 +2,7 @@ package com.tume.scalarpg.model
 
 import android.util.Log
 import com.tume.engine.util.Bitmaps
+import com.tume.scalarpg.model.potion.Potion
 import com.tume.scalarpg.model.property.Damage
 import com.tume.scalarpg.{R, TheGame}
 import com.tume.scalarpg.model.Direction.Direction
@@ -21,6 +22,9 @@ class Hero(game: TheGame) extends Creature(game) {
 
   def standardScaling = (5 + level * (level + 1) / 2).toDouble / 6
   def logarithmicScaling = (Math.log(level + 5)) / (Math.log(6))
+
+
+  var potions = Vector.empty[Potion]
 
   def speed = 5f
 
@@ -46,9 +50,20 @@ class Hero(game: TheGame) extends Creature(game) {
         }
       }
     } else {
+      // Interact with items in the tile
+      for (o <- currentTile.get.objects) {
+        if (o.isInstanceOf[Potion]) {
+          pickupPotion(o.asInstanceOf[Potion])
+        }
+      }
       game.playerActionDone(1f)
     }
     false
+  }
+
+  def pickupPotion(potion: Potion): Unit = {
+    potions = potions :+ potion
+    theGame.removeObject(potion)
   }
 
   def update(delta: Double): Unit = { }
@@ -71,6 +86,23 @@ class Hero(game: TheGame) extends Creature(game) {
     this.level += 1
     this.health += maxHealth - oldHealth
     this.mana += maxMana - oldMana
+  }
+
+  def potionAmount(potionType: Class[_ <: Potion]): Int = potions.filter(_.getClass == potionType).size
+
+  def quaffPotion(potionType: Class[_ <: Potion]): Unit = {
+    if (potionAmount(potionType) > 0) {
+      var potion: Option[Potion] = None
+      this.potions = potions.filterNot(p => {
+        if (p.getClass == potionType && potion.isEmpty) {
+          potion = Some(p)
+          true
+        } else {
+          false
+        }
+      })
+      potion.get.quaff(this)
+    }
   }
 
 }

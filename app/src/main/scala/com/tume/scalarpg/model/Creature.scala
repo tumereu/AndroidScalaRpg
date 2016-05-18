@@ -4,7 +4,8 @@ import android.util.Log
 import com.tume.engine.util.Bitmaps
 import com.tume.scalarpg.model.Direction.Direction
 import com.tume.scalarpg.model.potion.Potion
-import com.tume.scalarpg.model.property.Damage
+import com.tume.scalarpg.model.property.{Healing, Damage}
+import com.tume.scalarpg.model.property.HealType._
 import com.tume.scalarpg.model.property.Element._
 import com.tume.scalarpg.{TheGame, R}
 
@@ -18,8 +19,6 @@ class Creature(val theGame: TheGame) extends TileObject {
 
   var health, mana = 0D
 
-  var potions = Vector.empty[Potion]
-
   this.bitmap = Some(Bitmaps.get(R.drawable.dwarf))
 
   def move(dir: Direction): Boolean = {
@@ -27,21 +26,10 @@ class Creature(val theGame: TheGame) extends TileObject {
     if (tile.isDefined && tile.get.canBeEntered) {
       this.currentTile.foreach(_.removeObject(this))
       tile.foreach(_.addObject(this))
-      // Interact with items in the tile
-      for (o <- currentTile.get.objects) {
-        if (o.isInstanceOf[Potion]) {
-          pickupPotion(o.asInstanceOf[Potion])
-        }
-      }
       true
     } else {
       false
     }
-  }
-
-  def pickupPotion(potion: Potion): Unit = {
-    potions = potions :+ potion
-    theGame.removeObject(potion)
   }
 
   def calculateBasicAttackDamage: Damage = {
@@ -54,6 +42,24 @@ class Creature(val theGame: TheGame) extends TileObject {
       health = 0
       this.die()
     }
+  }
+
+  def heal(healing: Healing): Unit = {
+    healing.healType match {
+      case Health => {
+        this.health += healing.amount
+        if (this.health > this.maxHealth) {
+          this.health = this.maxHealth
+        }
+      }
+      case Mana => {
+        this.mana += healing.amount
+        if (this.mana > this.maxMana) {
+          this.mana = this.maxMana
+        }
+      }
+    }
+    theGame.addHealingObject(healing, currentTile.get)
   }
 
   def die(): Unit = {
