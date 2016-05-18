@@ -1,6 +1,7 @@
 package com.tume.scalarpg.model
 
 import android.graphics.{Paint, Bitmap, Canvas}
+import com.tume.scalarpg.TheGame
 
 /**
   * Created by tume on 5/11/16.
@@ -20,13 +21,19 @@ class TileObject {
       canvas.scale(relativeSize, relativeSize)
       canvas.translate(-translation, -translation)
 
-      canvas.drawBitmap(bitmap.get, 0, 0, new Paint())
+      canvas.drawBitmap(bitmap.get, 0, 0, bitmapPaint)
 
       canvas.translate(translation, translation)
       canvas.scale(1F / relativeSize, 1F / relativeSize)
       canvas.translate(-translation, -translation)
     }
   }
+
+  def bitmapPaint = new Paint()
+
+  def roundEnded(game: TheGame): Unit = { }
+
+  def turnEnded(game: TheGame): Unit = { }
 
 }
 object TileObject {

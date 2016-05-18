@@ -64,7 +64,7 @@ class HomingTextObject(pa: Paint, te: String, val start: (Float, Float), val tar
       remainingDuration = 0
     }
     val t = 1 - remainingDuration / homingDuration
-    val coordinates = curve.eval(t.toFloat)
+    val coordinates = curve.eval(Math.pow(t.toFloat, 1.4).toFloat)
     x = coordinates._1
     y = coordinates._2
   }

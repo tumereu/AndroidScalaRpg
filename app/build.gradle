@@ -37,12 +37,14 @@ android {
         }
     }
 
+    dexOptions {
+    }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:23.3.0'
-    compile "org.scala-lang:scala-library:2.11.7"
-    compile "com.android.support:multidex:1.0.1"
-    compile project(":engine")
+    compile 'org.scala-lang:scala-library:2.11.7'
+    compile 'com.android.support:multidex:1.0.1'
+    compile project(':engine')
 }

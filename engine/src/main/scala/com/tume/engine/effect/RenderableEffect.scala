@@ -7,6 +7,8 @@ import android.graphics.Canvas
   */
 trait RenderableEffect {
 
+  var onRemove = () => {}
+
   def update(delta: Float)
   def isRemovable: Boolean
   def render(canvas: Canvas)

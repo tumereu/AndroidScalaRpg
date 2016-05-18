@@ -82,4 +82,8 @@ object Input {
     }
   }
 
+  def wasTouchInside(x: Float, y: Float, width: Float, height: Float): Boolean = {
+      lastTouchLocation._1 >= x && lastTouchLocation._1 <= x + width && lastTouchLocation._2 >= y && lastTouchLocation._2 <= y + height
+  }
+
 }

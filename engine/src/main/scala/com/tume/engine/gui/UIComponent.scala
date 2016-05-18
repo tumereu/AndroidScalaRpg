@@ -16,7 +16,7 @@ abstract class UIComponent {
   var view: Option[String] = None
   var listener: Option[UIEventListener] = None
 
-  var color1, color2: Int = 0
+  var color1, color2, color3, color4: Int = -1
 
   protected var enabled = true
   protected var visible = true
@@ -62,6 +62,9 @@ abstract class UIComponent {
   def interactable = visible && enabled
 
   def update(delta: Double): Unit = {
+    if (Input.wasTouchInside(x, y, width, height) && interactable && Input.touchEndedThisFrame) {
+      onClick()
+    }
     if (Input.isTouchInside(x, y, width, height) && interactable) {
       this.innerState = Pressed
       UIFocus.currentFocus = Some(this)
@@ -73,8 +76,8 @@ abstract class UIComponent {
     }
   }
 
-  def onTouch(): Unit = {
-  }
+  def onTouch(): Unit = {}
+  def onClick(): Unit = {}
 
   def throwEvent(event: UIEvent): Unit = {
     if (this.listener.isDefined && this.view.isDefined && this.id.isDefined) {
