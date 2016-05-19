@@ -2,7 +2,7 @@ package com.tume.scalarpg.model
 
 import android.util.Log
 import com.tume.engine.util.Bitmaps
-import com.tume.scalarpg.model.potion.Potion
+import com.tume.scalarpg.model.potion.{ManaPotion, HealthPotion, Potion}
 import com.tume.scalarpg.model.property.Damage
 import com.tume.scalarpg.{R, TheGame}
 import com.tume.scalarpg.model.Direction.Direction
@@ -23,8 +23,7 @@ class Hero(game: TheGame) extends Creature(game) {
   def standardScaling = (5 + level * (level + 1) / 2).toDouble / 6
   def logarithmicScaling = (Math.log(level + 5)) / (Math.log(6))
 
-
-  var potions = Vector.empty[Potion]
+  var potions = Vector.empty[Potion] :+ new HealthPotion :+ new HealthPotion :+ new ManaPotion
 
   def speed = 5f
 
