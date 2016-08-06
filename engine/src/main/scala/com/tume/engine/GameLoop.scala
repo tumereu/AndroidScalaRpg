@@ -2,8 +2,7 @@ package com.tume.engine
 
 import android.graphics.Canvas
 import android.util.Log
-import com.tume.engine.gui.UISystem
-import com.tume.engine.util.Input
+import com.tume.engine.anim.Animations
 
 /**
   * Created by tume on 5/11/16.
@@ -28,12 +27,14 @@ class GameLoop(val game: Game, val view: GameView) extends Runnable {
         view.surfaceHolder.synchronized {
           val frameStart = System.currentTimeMillis()
           var framesSkipped = 0
-          val fixedDelta = 1D / FPS
+          val fixedDelta = 1F / FPS
           update(fixedDelta)
           if (canvas != null) {
+            game.background.render(canvas)
+            effects.renderBelow(canvas)
             game.render(canvas)
             ui.render(canvas)
-            effects.render(canvas)
+            effects.renderAbove(canvas)
           }
           val diff = System.currentTimeMillis() - frameStart
           val sleepTime = FRAME_LENGTH - diff
@@ -54,8 +55,9 @@ class GameLoop(val game: Game, val view: GameView) extends Runnable {
     Log.d("GameLoopInfo", "Stopping game loop..")
   }
 
-  private def update(delta: Double): Unit = {
+  private def update(delta: Float): Unit = {
     Input.onFrameChange()
+    Animations.update(delta)
     ui.update(delta)
     game.update(delta)
     effects.update(delta)

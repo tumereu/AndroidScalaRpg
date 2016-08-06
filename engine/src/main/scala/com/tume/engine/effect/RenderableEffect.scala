@@ -7,10 +7,16 @@ import android.graphics.Canvas
   */
 trait RenderableEffect {
 
+  def layer = EffectLayer.AboveAll
+
   var onRemove = () => {}
 
   def update(delta: Float)
   def isRemovable: Boolean
   def render(canvas: Canvas)
 
+}
+object EffectLayer extends Enumeration {
+  type EffectLayer = Value
+  val BelowAll, AboveAll = Value
 }

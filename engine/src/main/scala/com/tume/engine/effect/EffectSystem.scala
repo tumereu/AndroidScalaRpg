@@ -8,20 +8,31 @@ import android.util.Log
   */
 class EffectSystem {
 
-  var effects = Vector.empty[RenderableEffect]
+  var effectsBelow = Vector.empty[RenderableEffect]
+  var effectsAbove = Vector.empty[RenderableEffect]
 
-  def update(delta: Double): Unit = {
-    for (e <- effects) e.update(delta.toFloat)
-    for (e <- effects.filter(_.isRemovable)) e.onRemove()
-    effects = effects.filterNot(_.isRemovable)
+  def update(delta: Float): Unit = {
+    for (e <- effectsBelow) e.update(delta)
+    for (e <- effectsAbove) e.update(delta)
+    for (e <- effectsBelow.filter(_.isRemovable)) e.onRemove()
+    for (e <- effectsAbove.filter(_.isRemovable)) e.onRemove()
+    effectsBelow = effectsBelow.filterNot(_.isRemovable)
+    effectsAbove = effectsAbove.filterNot(_.isRemovable)
   }
 
-  def render(canvas: Canvas): Unit = {
-    for (e <- effects) e.render(canvas)
+  def renderBelow(canvas: Canvas): Unit = {
+    for (e <- effectsBelow) e.render(canvas)
+  }
+
+  def renderAbove(canvas: Canvas): Unit = {
+    for (e <- effectsAbove) e.render(canvas)
   }
 
   def add(renderableEffect: RenderableEffect): Unit = {
-    effects = effects :+ renderableEffect
+    renderableEffect.layer match {
+      case EffectLayer.AboveAll => effectsAbove = effectsAbove :+ renderableEffect
+      case EffectLayer.BelowAll => effectsBelow = effectsBelow :+ renderableEffect
+    }
   }
 
 }

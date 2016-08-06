@@ -6,12 +6,14 @@ import com.tume.scalarpg.model.Direction._
 import com.tume.engine.Game
 import com.tume.engine.gui.{UIButton, UITheme, UIProgressBar, UIView}
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
-import com.tume.engine.util.{Bitmaps, DisplayUtils}
+import com.tume.engine.util.{Calc, Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
 import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, HealthPotion}
 import com.tume.scalarpg.model.property.{Healing, Damage}
 import com.tume.scalarpg.ui.{Colors, GameCanvas, Drawables, GameUI}
 import com.tume.engine.effect._
+
+import scala.util.Random
 
 /**
   * Created by tume on 5/11/16.
@@ -19,6 +21,7 @@ import com.tume.engine.effect._
 class TheGame extends Game {
 
   var currentTime = 0f
+  var fullTurnsInRound = 10
 
   var floor = Map[(Int, Int), Tile]()
   var floorWidth, floorHeight = 0
@@ -48,9 +51,12 @@ class TheGame extends Game {
     }
   }
 
+  def roundTime = player.speed * fullTurnsInRound
+
   def tileAt(loc: (Int, Int)) : Option[Tile] = floor.get(loc)
 
-  def update(delta: Double): Unit = {
+  override def update(delta: Float): Unit = {
+    super.update(delta)
     healthBar.updateProgress(player.health.toInt, player.maxHealth.toInt)
     manaBar.updateProgress(player.mana.toInt, player.maxMana.toInt)
     xpBar.updateProgress(player.xp, player.reqXp)
@@ -73,21 +79,27 @@ class TheGame extends Game {
         o.turnEnded(this)
       }
     }
-    if (currentTime >= player.speed) {
-      currentTime -= player.speed
+    if (currentTime >= roundTime) {
+      currentTime -= roundTime
       for (tile <- floor.values) {
         for (o <- tile.objects) {
           o.roundEnded(this)
         }
       }
-      tryToSpawnEnemy()
-      tryToSpawnPotion()
+      var spawned = 1
+      for (i <- 0 to 9) {
+        if (tryToSpawnEnemy(spawned)) {
+          spawned += 1
+        }
+      }
+//      findUIComponent("timeBar").get.asInstanceOf[UIProgressBar].overflow(1)
     }
-    findUIComponent("timeBar").get.asInstanceOf[UIProgressBar].updateRawProgress(Some(currentTime / player.speed))
+    tryToSpawnPotion()
+    findUIComponent("timeBar").get.asInstanceOf[UIProgressBar].updateRawProgress(Some(currentTime / roundTime))
   }
 
   def tryToSpawnPotion(): Unit = {
-    if (Math.random() < 0.05f) {
+    if (Math.random() < 0.02f) {
       spawn(Potion.randomPotion)
     }
   }
@@ -133,7 +145,7 @@ class TheGame extends Game {
 
   def spawn(tileObject: TileObject): Unit = {
     val frees = this.floor.values.filter(_.objects.isEmpty).toSeq
-    if (!frees.isEmpty) {
+    if (frees.nonEmpty) {
       val loc = frees((Math.random * frees.size).toInt)
       loc.addObject(tileObject)
       if (tileObject.isInstanceOf[Enemy]) {
@@ -142,14 +154,17 @@ class TheGame extends Game {
     }
   }
 
-  def tryToSpawnEnemy(): Unit = {
-    if (Math.random() < 0.2 || this.enemies.isEmpty) {
+  def tryToSpawnEnemy(n: Int): Boolean = {
+    if (Math.random() < 1f / n || this.enemies.isEmpty) {
       spawn(new Enemy(this))
+      true
+    } else {
+      false
     }
   }
 
-  def render(canvas: Canvas): Unit = {
-    canvas.drawColor(0xff000000)
+  override def render(canvas: Canvas): Unit = {
+    super.render(canvas)
   }
 
   override def views: Seq[UIView] = Vector(new GameUI())

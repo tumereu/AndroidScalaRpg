@@ -12,8 +12,12 @@ object DisplayUtils {
 
   def init(context: Context): Unit = {
     scale = context.getResources.getDisplayMetrics.scaledDensity
-    screenWidth = context.getResources.getDisplayMetrics.widthPixels
-    screenHeight = context.getResources.getDisplayMetrics.heightPixels
+    resize(context.getResources.getDisplayMetrics.widthPixels, context.getResources.getDisplayMetrics.heightPixels)
+  }
+
+  def resize(width: Int, height: Int): Unit = {
+    screenWidth = width
+    screenHeight = height
     screenSize = Math.min(screenWidth, screenHeight)
   }
 

@@ -3,7 +3,7 @@ package com.tume.engine
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.{Window, WindowManager}
+import android.view.{View, Window, WindowManager}
 import com.tume.engine.effect.EffectSystem
 import com.tume.engine.gui.UISystem
 import com.tume.engine.util.{DisplayUtils, Bitmaps}
@@ -18,14 +18,18 @@ abstract class GameActivity extends AppCompatActivity {
 
   override protected def onCreate(savedInstance: Bundle): Unit = {
     super.onCreate(savedInstance)
-    requestWindowFeature(Window.FEATURE_NO_TITLE);
+    requestWindowFeature(Window.FEATURE_NO_TITLE)
     requestWindowFeature(Window.FEATURE_ACTION_BAR)
     getSupportActionBar.hide()
-    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-      WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    getWindow.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+      WindowManager.LayoutParams.FLAG_FULLSCREEN)
+    getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
     setContentView(R.layout.game_activity)
-    init(createGame)
+    val gameView = findViewById(R.id.gameView)
+    val game = createGame
+    game.gameView = gameView.asInstanceOf[GameView]
+    init(game)
   }
 
   def createGame: Game

@@ -6,9 +6,7 @@ import android.util.Log
   * Created by tume on 5/15/16.
   */
 abstract class Curve {
-
   def eval(t: Float): (Float, Float)
-
 }
 case class LinearCurve(p0: (Float, Float), p1: (Float, Float)) extends Curve {
   override def eval(t: Float): (Float, Float) = (p0._1 + (p1._1 - p0._1) * t, p0._2 + (p1._2 - p0._2) * t)

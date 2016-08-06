@@ -1,8 +1,10 @@
 package com.tume.engine.gui
 
 import android.graphics.Canvas
+import android.util.Log
+import com.tume.engine.Input
 import com.tume.engine.gui.event.UIEventListener
-import com.tume.engine.util.Input
+import com.tume.engine.util.D
 
 /**
   * Created by tume on 5/12/16.
@@ -12,7 +14,7 @@ class UISystem {
   var components = Map[String, Vector[UIComponent]]()
   var activeComponents = Vector[UIComponent]()
 
-  var activePopups = Vector.empty[UIComponent]
+  var activePopups = Vector.empty[UIPopupPanel]
 
   def init(views: Seq[UIView], listener: UIEventListener): Unit = {
     for (v <- views) {
@@ -30,23 +32,33 @@ class UISystem {
       cmp.toggleVisibility(false)
       cmp.init()
     }
-    if (!views.isEmpty) {
+    if (views.nonEmpty) {
       this.show(views.head.name)
     }
   }
 
-  def update(delta: Double): Unit = {
+  def update(delta: Float): Unit = {
     var toBeRemoved : Option[UIComponent] = None
-    if (Input.touchStartedThisFrame && !this.activePopups.isEmpty) {
+    if (activePopups.nonEmpty) {
       val a = this.activePopups.head
-      if (!Input.isTouchInside(a.x, a.y, a.width, a.height)) {
+      if (Input.tap && !Input.tap(a.boundingBox)) {
+        a.onToBeRemoved()
+      }
+      if (a.isReadyToBeRemoved) {
         toBeRemoved = Some(a)
       }
     }
     for (cmp <- components.values.flatten) {
-      cmp.update(delta)
+      try {
+        cmp.update(delta)
+      } catch {
+        case e: Exception => {
+          Log.e(getClass.toString, "Exception when updating ui component " + cmp.id.getOrElse(""), e)
+          System.exit(0)
+        }
+      }
     }
-    toBeRemoved.foreach(removePopup(_))
+    toBeRemoved.foreach(removePopup)
   }
 
   def render(canvas: Canvas): Unit = {
@@ -94,7 +106,7 @@ class UISystem {
     }
   }
 
-  def addPopup(uIComponent: UIComponent): Unit = {
+  def addPopup(uIComponent: UIPopupPanel): Unit = {
     activePopups = activePopups :+ uIComponent
     uIComponent.onAddAsPopup(activePopups)
   }

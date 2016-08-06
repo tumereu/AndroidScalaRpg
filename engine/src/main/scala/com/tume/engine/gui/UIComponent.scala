@@ -1,8 +1,10 @@
 package com.tume.engine.gui
 
 import android.graphics.{Bitmap, Canvas, Paint}
+import com.tume.engine.Input
 import com.tume.engine.gui.event.{UIEvent, UIEventListener}
-import com.tume.engine.util.{Bitmaps, DisplayUtils, Input}
+import com.tume.engine.model.{Shape, Rect}
+import com.tume.engine.util.{Bitmaps, DisplayUtils}
 
 /**
   * Created by tume on 5/12/16.
@@ -67,14 +69,14 @@ abstract class UIComponent {
 
   def interactable = visible && enabled && uiSystem.isReceivingInput(this)
 
-  def update(delta: Double): Unit = {
-    if (Input.wasTouchInside(x, y, width, height) && interactable && Input.touchEndedThisFrame && innerState == Pressed) {
+  def update(delta: Float): Unit = {
+    if (Input.tap(boundingBox)) {
       onClick()
     }
-    if (Input.isTouchInside(x, y, width, height) && interactable && (innerState == Pressed || Input.touchStartedThisFrame)) {
+    if (Input.touching(boundingBox)) {
       this.innerState = Pressed
       UIFocus.currentFocus = Some(this)
-      if (Input.touchStartedThisFrame) {
+      if (Input.touchStarted(boundingBox)) {
         onTouch()
       }
     } else {
@@ -92,6 +94,8 @@ abstract class UIComponent {
       this.listener.get.onUIEvent(event)
     }
   }
+
+  def boundingBox : Shape = Rect(x, y, x + width, y + height)
 
   def layer = 0
 

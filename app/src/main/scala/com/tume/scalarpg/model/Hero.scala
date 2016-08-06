@@ -29,6 +29,7 @@ class Hero(game: TheGame) extends Creature(game) {
 
   def attackSpeed = 1.5f
 
+
   override def maxHealth = standardScaling * 100
   override def maxMana = logarithmicScaling * 100
 
