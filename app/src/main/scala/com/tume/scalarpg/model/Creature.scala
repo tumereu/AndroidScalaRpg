@@ -1,9 +1,9 @@
 package com.tume.scalarpg.model
 
-import android.util.Log
-import com.tume.engine.util.Bitmaps
+import com.tume.engine.anim.{ClampedLinearSpikeAnim, LinearAnim, Animation}
+import com.tume.engine.model.Vec2
+import com.tume.engine.util.{Rand, Calc, Bitmaps}
 import com.tume.scalarpg.model.Direction.Direction
-import com.tume.scalarpg.model.potion.Potion
 import com.tume.scalarpg.model.property.{Healing, Damage}
 import com.tume.scalarpg.model.property.HealType._
 import com.tume.scalarpg.model.property.Element._
@@ -14,16 +14,21 @@ import com.tume.scalarpg.{TheGame, R}
   */
 class Creature(val theGame: TheGame) extends TileObject {
 
-  def maxHealth = 0D
-  def maxMana = 0D
+  var animLoc = Option[Vec2](null)
+  var moveAnim = Animation()
 
-  var health, mana = 0D
+  def maxHealth = 0f
+  def maxMana = 0f
+
+  var health, mana = 0f
 
   this.bitmap = Some(Bitmaps.get(R.drawable.dwarf))
 
   def move(dir: Direction): Boolean = {
     val tile = theGame.tileAt(Direction.atCoordinates(currentTile.get.location, dir))
     if (tile.isDefined && tile.get.canBeEntered) {
+      animLoc = Some(Vec2(currentTile.get.x, currentTile.get.y))
+      moveAnim = LinearAnim(0.065f)
       this.currentTile.foreach(_.removeObject(this))
       tile.foreach(_.addObject(this))
       true
@@ -32,9 +37,12 @@ class Creature(val theGame: TheGame) extends TileObject {
     }
   }
 
-  def calculateBasicAttackDamage: Damage = {
-    new Damage(Math.random() * 2, Physical)
+  override def offSet: Vec2 = moveAnim match {
+    case c: ClampedLinearSpikeAnim => (currentTile.get.loc.lerp(animLoc.get, moveAnim.value / 2) - currentTile.get.loc) * Tile.size
+    case _ =>  if (animLoc.isEmpty) Vec2.zero else (animLoc.get.lerp(currentTile.get.loc, moveAnim.value) - currentTile.get.loc) * Tile.size
   }
+
+  def calculateBasicAttackDamage: Damage = Damage(Rand.f(2f), Physical)
 
   def takeDamage(damage: Damage) = {
     this.health -= damage.amount

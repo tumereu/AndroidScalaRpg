@@ -8,7 +8,8 @@ import com.tume.engine.util.Bitmaps
 class Wall(drawable: Int) extends TileObject {
 
   this.bitmap = Some(Bitmaps.get(drawable))
-  this.relativeSize = 1f
+
+  override def relativeSize = 1f
 
   override def isPassable = false
 

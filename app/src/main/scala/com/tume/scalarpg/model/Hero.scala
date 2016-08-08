@@ -1,7 +1,8 @@
 package com.tume.scalarpg.model
 
 import android.util.Log
-import com.tume.engine.util.Bitmaps
+import com.tume.engine.anim.ClampedLinearSpikeAnim
+import com.tume.engine.util.{Rand, Calc, Bitmaps}
 import com.tume.scalarpg.model.potion.{ManaPotion, HealthPotion, Potion}
 import com.tume.scalarpg.model.property.Damage
 import com.tume.scalarpg.{R, TheGame}
@@ -20,8 +21,8 @@ class Hero(game: TheGame) extends Creature(game) {
 
   def reqXp = (Math.pow(level, 1.4) * 100).toInt
 
-  def standardScaling = (5 + level * (level + 1) / 2).toDouble / 6
-  def logarithmicScaling = (Math.log(level + 5)) / (Math.log(6))
+  def standardScaling = (5 + level * (level + 1) / 2).toFloat / 6
+  def logarithmicScaling = Calc.log(level + 5) / Calc.log(6)
 
   var potions = Vector.empty[Potion] :+ new HealthPotion :+ new HealthPotion :+ new ManaPotion
 
@@ -47,13 +48,16 @@ class Hero(game: TheGame) extends Creature(game) {
           game.addPlayerToEnemyDamageObject(dmg, enemy.get.currentTile.get)
           enemy.get.asInstanceOf[Enemy].takeDamage(dmg)
           game.playerActionDone(attackSpeed)
+          animLoc = Some(tile.get.loc)
+          moveAnim = ClampedLinearSpikeAnim(0.15f, 5f)
         }
       }
     } else {
       // Interact with items in the tile
       for (o <- currentTile.get.objects) {
-        if (o.isInstanceOf[Potion]) {
-          pickupPotion(o.asInstanceOf[Potion])
+        o match {
+          case potion: Potion => pickupPotion(potion)
+          case _ =>
         }
       }
       game.playerActionDone(1f)
@@ -68,9 +72,7 @@ class Hero(game: TheGame) extends Creature(game) {
 
   def update(delta: Double): Unit = { }
 
-  override def calculateBasicAttackDamage = {
-    new Damage(standardScaling * 2 + Math.random() * standardScaling * 2, Physical)
-  }
+  override def calculateBasicAttackDamage = Damage(Rand.f(standardScaling * 2, standardScaling * 4), Physical)
 
   def gainXp(xp: Int): Unit = {
     this.xp += xp
@@ -88,7 +90,7 @@ class Hero(game: TheGame) extends Creature(game) {
     this.mana += maxMana - oldMana
   }
 
-  def potionAmount(potionType: Class[_ <: Potion]): Int = potions.filter(_.getClass == potionType).size
+  def potionAmount(potionType: Class[_ <: Potion]): Int = potions.count(_.getClass == potionType)
 
   def quaffPotion(potionType: Class[_ <: Potion]): Unit = {
     if (potionAmount(potionType) > 0) {

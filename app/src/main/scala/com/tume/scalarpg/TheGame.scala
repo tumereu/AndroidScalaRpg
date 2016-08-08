@@ -6,11 +6,11 @@ import com.tume.scalarpg.model.Direction._
 import com.tume.engine.Game
 import com.tume.engine.gui.{UIButton, UITheme, UIProgressBar, UIView}
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
-import com.tume.engine.util.{Calc, Bitmaps, DisplayUtils}
+import com.tume.engine.util.{Rand, Calc, Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
 import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, HealthPotion}
 import com.tume.scalarpg.model.property.{Healing, Damage}
-import com.tume.scalarpg.ui.{Colors, GameCanvas, Drawables, GameUI}
+import com.tume.scalarpg.ui._
 import com.tume.engine.effect._
 
 import scala.util.Random
@@ -22,6 +22,7 @@ class TheGame extends Game {
 
   var currentTime = 0f
   var fullTurnsInRound = 10
+  var currentRound = 1
 
   var floor = Map[(Int, Int), Tile]()
   var floorWidth, floorHeight = 0
@@ -46,12 +47,20 @@ class TheGame extends Game {
     floor((1, 1)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
     floor((2, 1)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
     floor((1, 2)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
-    for (i <- 1 to 3) {
-      spawn(new Enemy(this))
+    spawnRoundEnemies()
+  }
+
+  def spawnRoundEnemies(): Unit = {
+    var spawned = 1
+    for (i <- 1 to 7 + currentRound * 3) {
+      if (tryToSpawnEnemy(spawned)) {
+        spawned += 1
+      }
     }
   }
 
   def roundTime = player.speed * fullTurnsInRound
+  def danger = currentRound * 2 + 5
 
   def tileAt(loc: (Int, Int)) : Option[Tile] = floor.get(loc)
 
@@ -61,12 +70,12 @@ class TheGame extends Game {
     manaBar.updateProgress(player.mana.toInt, player.maxMana.toInt)
     xpBar.updateProgress(player.xp, player.reqXp)
 
-    healthPotion.cornerText = player.potionAmount(new HealthPotion().getClass).toString
-    healthPotion.enabled = player.potionAmount(new HealthPotion().getClass) > 0
-    manaPotion.cornerText = player.potionAmount(new ManaPotion().getClass).toString
-    manaPotion.enabled = player.potionAmount(new ManaPotion().getClass) > 0
-    xpPotion.cornerText = player.potionAmount(new ExperiencePotion().getClass).toString
-    xpPotion.enabled = player.potionAmount(new ExperiencePotion().getClass) > 0gia
+    healthPotion.cornerText = player.potionAmount(HealthPotion().getClass).toString
+    healthPotion.enabled = player.potionAmount(HealthPotion().getClass) > 0
+    manaPotion.cornerText = player.potionAmount(ManaPotion().getClass).toString
+    manaPotion.enabled = player.potionAmount(ManaPotion().getClass) > 0
+    xpPotion.cornerText = player.potionAmount(ExperiencePotion().getClass).toString
+    xpPotion.enabled = player.potionAmount(ExperiencePotion().getClass) > 0
 
     player.update(delta)
   }
@@ -75,23 +84,18 @@ class TheGame extends Game {
     this.currentTime += time
     for (tile <- floor.values) {
       for (o <- tile.objects) {
-        o.turnEnded(this)
+        o.turnEnded(this, time)
       }
     }
     if (currentTime >= roundTime) {
+      currentRound += 1
       currentTime -= roundTime
       for (tile <- floor.values) {
         for (o <- tile.objects) {
           o.roundEnded(this)
         }
       }
-      var spawned = 1
-      for (i <- 0 to 9) {
-        if (tryToSpawnEnemy(spawned)) {
-          spawned += 1
-        }
-      }
-//      findUIComponent("timeBar").get.asInstanceOf[UIProgressBar].overflow(1)
+      spawnRoundEnemies()
     }
     tryToSpawnPotion()
     findUIComponent("timeBar").get.asInstanceOf[UIProgressBar].updateRawProgress(Some(currentTime / roundTime))
@@ -129,12 +133,10 @@ class TheGame extends Game {
 
   def creatureDied(c: Creature): Unit = {
     enemies = enemies.filterNot(_ == c)
-    if (player != c) {
-      c.currentTile.get.removeObject(c)
-    }
-    if (c.isInstanceOf[Enemy]) {
-      val e = c.asInstanceOf[Enemy]
-      player.gainXp(e.xp)
+    if (player != c) c.currentTile.get.removeObject(c)
+    c match {
+      case e: Enemy => player.gainXp(e.property.xp)
+      case _ =>
     }
   }
 
@@ -147,15 +149,22 @@ class TheGame extends Game {
     if (frees.nonEmpty) {
       val loc = frees((Math.random * frees.size).toInt)
       loc.addObject(tileObject)
-      if (tileObject.isInstanceOf[Enemy]) {
-        enemies = enemies :+ tileObject.asInstanceOf[Enemy]
+      tileObject match {
+        case enemy: Enemy =>  {
+          enemies = enemies :+ enemy
+          enemy.spawn()
+        }
+        case p: Potion => p.spawn()
+        case _ =>
       }
     }
   }
 
   def tryToSpawnEnemy(n: Int): Boolean = {
     if (Math.random() < 1f / n || this.enemies.isEmpty) {
-      spawn(new Enemy(this))
+      val d = this.danger * 10 / (9 + n)
+      val dang = Math.min(Rand.i(this.danger * 7 / 10, d), Rand.i(this.danger * 7 / 10, d))
+      spawn(new Enemy(this, Enemies.byDanger(dang)))
       true
     } else {
       false
@@ -166,7 +175,7 @@ class TheGame extends Game {
     super.render(canvas)
   }
 
-  override def views: Seq[UIView] = Vector(new GameUI())
+  override def views: Seq[UIView] = Vector(new HeroUI(), new GameUI())
 
   override def onUIEvent(event: UIEvent): Unit = {
     event match {
@@ -196,5 +205,6 @@ class TheGame extends Game {
     xpPotion = findUIComponent("xpPotion").get.asInstanceOf[UIButton]
 
     gameCanvas.game = Some(this)
+    findUIComponent("timeBar").get.asInstanceOf[UIProgressBar].updateRawProgress(Some(currentTime / roundTime))
   }
 }

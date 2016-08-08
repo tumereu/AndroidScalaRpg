@@ -1,6 +1,7 @@
 package com.tume.scalarpg.model
 
 import android.graphics.{Paint, Canvas}
+import com.tume.engine.model.Vec2
 import com.tume.engine.util.{DisplayUtils, Bitmaps}
 
 /**
@@ -17,6 +18,7 @@ class Tile(val x: Int, val y: Int, floorResource: Int) {
   }
 
   def location = (x, y)
+  def loc = Vec2(x, y)
 
   def renderObjects(canvas: Canvas): Unit = {
     for (o <- this.objects) {
@@ -36,7 +38,7 @@ class Tile(val x: Int, val y: Int, floorResource: Int) {
     }
   }
 
-  def canBeEntered = this.objects.find(!_.isPassable).isEmpty
+  def canBeEntered = !this.objects.exists(!_.isPassable)
 
 }
 object Tile {

@@ -9,10 +9,10 @@ import com.tume.scalarpg.model.property.HealType._
 /**
   * Created by tume on 5/17/16.
   */
-class HealthPotion extends Potion {
+case class HealthPotion() extends Potion {
   this.bitmap = Some(Bitmaps.get(R.drawable.potion_ruby))
 
   override def quaff(player: Hero): Unit = {
-    player.heal(new Healing(player.maxHealth * 0.33, Health))
+    player.heal(new Healing(player.maxHealth * 0.33f, Health))
   }
 }
