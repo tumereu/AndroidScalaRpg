@@ -66,8 +66,7 @@ class TheGame extends Game {
     manaPotion.cornerText = player.potionAmount(new ManaPotion().getClass).toString
     manaPotion.enabled = player.potionAmount(new ManaPotion().getClass) > 0
     xpPotion.cornerText = player.potionAmount(new ExperiencePotion().getClass).toString
-    xpPotion.enabled = player.potionAmount(new ExperiencePotion().getClass) > 0
-
+    xpPotion.enabled = player.potionAmount(new ExperiencePotion().getClass) > 0gia
 
     player.update(delta)
   }
