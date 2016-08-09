@@ -14,7 +14,7 @@ import com.tume.scalarpg.model.property.Element._
   */
 class Hero(game: TheGame) extends Creature(game) {
 
-  this.bitmap = Some(Bitmaps.get(R.drawable.dwarf))
+  this.bitmap = Some(Bitmaps.get(R.drawable.hero_knight))
 
   var level = 1
   var xp = 0
