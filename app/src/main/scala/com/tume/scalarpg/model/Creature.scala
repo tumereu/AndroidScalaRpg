@@ -22,7 +22,7 @@ class Creature(val theGame: TheGame) extends TileObject {
 
   var health, mana = 0f
 
-  this.bitmap = Some(Bitmaps.get(R.drawable.hero_knight))
+  this.bitmap = Some(Bitmaps.get(R.drawable.hero_warrior))
 
   def move(dir: Direction): Boolean = {
     val tile = theGame.tileAt(Direction.atCoordinates(currentTile.get.location, dir))

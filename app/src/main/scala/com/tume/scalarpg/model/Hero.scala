@@ -2,7 +2,11 @@ package com.tume.scalarpg.model
 
 import android.util.Log
 import com.tume.engine.anim.ClampedLinearSpikeAnim
+import com.tume.engine.gui.model.UIModel
 import com.tume.engine.util.{Rand, Calc, Bitmaps}
+import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
+import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
+import com.tume.scalarpg.model.item.{EquipSlot, Equipment}
 import com.tume.scalarpg.model.potion.{ManaPotion, HealthPotion, Potion}
 import com.tume.scalarpg.model.property.Damage
 import com.tume.scalarpg.{R, TheGame}
@@ -14,28 +18,26 @@ import com.tume.scalarpg.model.property.Element._
   */
 class Hero(game: TheGame) extends Creature(game) {
 
-  this.bitmap = Some(Bitmaps.get(R.drawable.hero_knight))
+  this.bitmap = Some(Bitmaps.get(R.drawable.hero_warrior))
+
+  var equipment = Map[EquipSlot, Equipment]()
 
   var level = 1
   var xp = 0
+  def speed = 5f
+  def attackSpeed = 1.5f
 
+  override def maxHealth = standardScaling * 100
+  override def maxMana = logarithmicScaling * 100
   def reqXp = (Math.pow(level, 1.4) * 100).toInt
+
+  this.health = maxHealth
+  this.mana = maxMana
 
   def standardScaling = (5 + level * (level + 1) / 2).toFloat / 6
   def logarithmicScaling = Calc.log(level + 5) / Calc.log(6)
 
   var potions = Vector.empty[Potion] :+ new HealthPotion :+ new HealthPotion :+ new ManaPotion
-
-  def speed = 5f
-
-  def attackSpeed = 1.5f
-
-
-  override def maxHealth = standardScaling * 100
-  override def maxMana = logarithmicScaling * 100
-
-  this.health = maxHealth
-  this.mana = maxMana
 
   override def move(dir: Direction): Boolean = {
     val moved = super.move(dir)
@@ -105,6 +107,14 @@ class Hero(game: TheGame) extends Creature(game) {
       })
       potion.get.quaff(this)
     }
+  }
+
+  def createStartingEquipment(): Unit = {
+    this.equipment += EquipSlot.Helmet -> Equipment.generateArmor(1, theGame, EquipSlot.Helmet)
+    this.equipment += EquipSlot.Body -> Equipment.generateArmor(30, theGame, EquipSlot.Body)
+    this.equipment += EquipSlot.Boots -> Equipment.generateArmor(100, theGame, EquipSlot.Boots)
+    this.equipment += EquipSlot.MainHand -> Equipment.generateWeapon(40, theGame)
+    this.equipment += EquipSlot.OffHand -> Equipment.generateWeapon(1, theGame)
   }
 
 }

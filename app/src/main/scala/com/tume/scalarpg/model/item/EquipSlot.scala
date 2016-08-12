@@ -5,5 +5,14 @@ package com.tume.scalarpg.model.item
   */
 object EquipSlot extends Enumeration {
   type EquipSlot = Value
-  val Weapon, Head, Body, Legs, Trinket = Value
+  val Weapon, Helmet, Body, Boots, Trinket = Value
+  val MainHand, OffHand = Value
+}
+object WeaponCategory extends Enumeration {
+  type WeaponCategory = Value
+  val Sword, Axe, Mace, Dagger = Value
+  val GreatSword = Value("Greatsword")
+  val GreatAxe = Value("Greataxe")
+  val GreatHammer = Value("Great hammer")
+  val Shield, Focus, Staff, Bow = Value
 }

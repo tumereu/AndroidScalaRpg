@@ -8,6 +8,7 @@ import com.tume.engine.gui.{UIButton, UITheme, UIProgressBar, UIView}
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
 import com.tume.engine.util.{Rand, Calc, Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
+import com.tume.scalarpg.model.item.EquipSlot
 import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, HealthPotion}
 import com.tume.scalarpg.model.property.{Healing, Damage}
 import com.tume.scalarpg.ui._
@@ -98,7 +99,7 @@ class TheGame extends Game {
       spawnRoundEnemies()
     }
     tryToSpawnPotion()
-    findUIComponent("timeBar").get.asInstanceOf[UIProgressBar].updateRawProgress(Some(currentTime / roundTime))
+    findUIComponent[UIProgressBar]("timeBar").updateRawProgress(Some(currentTime / roundTime))
   }
 
   def tryToSpawnPotion(): Unit = {
@@ -196,15 +197,23 @@ class TheGame extends Game {
 
   override def init(): Unit = {
     createFloor()
-    gameCanvas = findUIComponent("gameCanvas").get.asInstanceOf[GameCanvas]
-    healthBar = findUIComponent("healthBar").get.asInstanceOf[UIProgressBar]
-    manaBar = findUIComponent("manaBar").get.asInstanceOf[UIProgressBar]
-    xpBar = findUIComponent("xpBar").get.asInstanceOf[UIProgressBar]
-    healthPotion = findUIComponent("healthPotion").get.asInstanceOf[UIButton]
-    manaPotion = findUIComponent("manaPotion").get.asInstanceOf[UIButton]
-    xpPotion = findUIComponent("xpPotion").get.asInstanceOf[UIButton]
+    this.player.createStartingEquipment()
+
+    gameCanvas = findUIComponent[GameCanvas]("gameCanvas")
+    healthBar = findUIComponent[UIProgressBar]("healthBar")
+    manaBar = findUIComponent[UIProgressBar]("manaBar")
+    xpBar = findUIComponent[UIProgressBar]("xpBar")
+    healthPotion = findUIComponent[UIButton]("healthPotion")
+    manaPotion = findUIComponent[UIButton]("manaPotion")
+    xpPotion = findUIComponent[UIButton]("xpPotion")
 
     gameCanvas.game = Some(this)
-    findUIComponent("timeBar").get.asInstanceOf[UIProgressBar].updateRawProgress(Some(currentTime / roundTime))
+    findUIComponent[UIProgressBar]("timeBar").updateRawProgress(Some(currentTime / roundTime))
+
+    findUIComponent[UIButton]("armor_select").register(this.player.equipment(EquipSlot.Body))
+    findUIComponent[UIButton]("boots_select").register(this.player.equipment(EquipSlot.Boots))
+    findUIComponent[UIButton]("helmet_select").register(this.player.equipment(EquipSlot.Helmet))
+    findUIComponent[UIButton]("main_weapon_select").register(this.player.equipment(EquipSlot.MainHand))
+    findUIComponent[UIButton]("off_weapon_select").register(this.player.equipment(EquipSlot.OffHand))
   }
 }
