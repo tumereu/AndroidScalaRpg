@@ -4,7 +4,7 @@ import android.graphics.{Canvas, Paint}
 import android.util.Log
 import com.tume.scalarpg.model.Direction._
 import com.tume.engine.Game
-import com.tume.engine.gui.{UIButton, UITheme, UIProgressBar, UIView}
+import com.tume.engine.gui._
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
 import com.tume.engine.util.{Rand, Calc, Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
@@ -210,10 +210,18 @@ class TheGame extends Game {
     gameCanvas.game = Some(this)
     findUIComponent[UIProgressBar]("timeBar").updateRawProgress(Some(currentTime / roundTime))
 
+    refreshHeroUI()
+  }
+
+  def refreshHeroUI(): Unit = {
     findUIComponent[UIButton]("armor_select").register(this.player.equipment(EquipSlot.Body))
     findUIComponent[UIButton]("boots_select").register(this.player.equipment(EquipSlot.Boots))
     findUIComponent[UIButton]("helmet_select").register(this.player.equipment(EquipSlot.Helmet))
     findUIComponent[UIButton]("main_weapon_select").register(this.player.equipment(EquipSlot.MainHand))
     findUIComponent[UIButton]("off_weapon_select").register(this.player.equipment(EquipSlot.OffHand))
+    findUIComponent[UIButton]("trinket_select").register(this.player.equipment(EquipSlot.Trinket))
+
+    findUIComponent[UILabel]("info_health").text = Calc.clean(this.player.maxHealth, 0)
+    findUIComponent[UILabel]("info_mana").text = Calc.clean(this.player.maxMana, 0)
   }
 }

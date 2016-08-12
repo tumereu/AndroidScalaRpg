@@ -9,8 +9,9 @@ import com.tume.scalarpg.model.property.DamageRange
 trait ImplicitAffix extends EquipmentAffix {
   def itemLevel = 1
 }
-case class ImplicitMeleeDamage(val fMin: Float, val fMax: Float) extends ImplicitAffix {
-  def range = DamageRange(fMin * standardScaling / 12f, fMax * standardScaling / 7f)
+case class ImplicitMeleeDamage(val fMin: Float, val fMax: Float, val il: Int) extends ImplicitAffix {
+  override def itemLevel = il
+  def range = DamageRange(fMin * standardScaling * 2, fMax * standardScaling * 3.5f)
   override def tooltipLine: String = range.cleanAmount + " dmg"
 }
 case class ImplicitMeleeAccuracy(val f: Float) extends ImplicitAffix {

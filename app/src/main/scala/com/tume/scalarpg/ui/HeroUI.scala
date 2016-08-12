@@ -34,14 +34,15 @@ class HeroUI extends UIView {
     // Name
     view += { lab=UIBuilder.label.text("Warrior").height(0.08f).width(0.8f).alignLeft(panel, 0.02f).alignTop(panel, 0.005f); name=lab; lab }
     // Stats row 1
-    view += { lab=UIBuilder.label.img(R.drawable.ic_heart).text("122").height(lh).width(sw).alignLeft(panel, 0.02f).below(name, 0.01f); first=lab; lab }
-    view += { lab=UIBuilder.label.img(R.drawable.ic_sword).text("2-5").height(lh).width(sw).alignLeft(panel, 0.02f).below(lab); lab }
-    view += { lab=UIBuilder.label.img(R.drawable.ic_crosshair).text("80%").height(lh).width(sw).alignLeft(panel, 0.02f).below(lab); lab }
-    view += { lab=UIBuilder.label.img(R.drawable.ic_staff).text("9").height(lh).width(sw).alignLeft(panel, 0.02f).below(lab); lab }
+    view += { lab=UIBuilder.label.img(R.drawable.ic_heart).text("122").height(lh).width(sw).alignLeft(panel, 0.02f).below(name, 0.01f); first=lab; lab }.id("info_health")
+    view += { lab=UIBuilder.label.img(R.drawable.ic_sword).text("2-5").height(lh).width(sw).alignLeft(panel, 0.02f).below(lab); lab }.id("info_damage")
+    view += { lab=UIBuilder.label.img(R.drawable.ic_crosshair).text("80%").height(lh).width(sw).alignLeft(panel, 0.02f).below(lab); lab }.id("info_accuracy")
+    view += { lab=UIBuilder.label.img(R.drawable.ic_staff).text("9").height(lh).width(sw).alignLeft(panel, 0.02f).below(lab); lab }.id("info_ability_power")
     // Stats row 2
-    view += { lab=UIBuilder.label.img(R.drawable.ic_mana).text("40").height(lh).width(sw).rightOf(first, 0.02f).alignTop(first); first=lab; lab }
-    view += { lab=UIBuilder.label.img(R.drawable.ic_critical_hit).text("6.7%").height(lh).width(sw).alignLeft(lab).below(lab); lab }
-    view += { lab=UIBuilder.label.img(R.drawable.ic_shoe).text("5").height(lh).width(sw).alignLeft(lab).below(lab); lab }
+    view += { lab=UIBuilder.label.img(R.drawable.ic_mana).text("40").height(lh).width(sw).rightOf(first, 0.02f).alignTop(first); first=lab; lab }.id("info_mana")
+    view += { lab=UIBuilder.label.img(R.drawable.ic_daggers).text("3.2").height(lh).width(sw).alignLeft(lab).below(lab); lab }.id("info_attack_speed")
+    view += { lab=UIBuilder.label.img(R.drawable.ic_critical_hit).text("6.7%").height(lh).width(sw).alignLeft(lab).below(lab); lab }.id("info_crit_chance")
+    view += { lab=UIBuilder.label.img(R.drawable.ic_shoe).text("5").height(lh).width(sw).alignLeft(lab).below(lab); lab }.id("info_speed")
     // Res row 1
     view += { lab=UIBuilder.label.img(R.drawable.ic_shield).text("5.4%").height(lh).width(rw).rightOf(first, 0.02f).alignTop(first); first=lab; lab }
     view += { lab=UIBuilder.label.img(R.drawable.ic_flame).text("2.2%").height(lh).width(rw).alignLeft(lab).below(lab); lab }
@@ -58,7 +59,7 @@ class HeroUI extends UIView {
     view += { bt=UIBuilder.button.size(0.15f).alignTop(bt).rightOf(bt).id("helmet_select"); bt }
     view += { bt=UIBuilder.button.size(0.15f).alignTop(bt).rightOf(bt).id("armor_select"); bt }
     view += { bt=UIBuilder.button.size(0.15f).alignTop(bt).rightOf(bt).id("boots_select"); bt }
-    view += { bt=UIBuilder.button.size(0.15f).alignTop(bt).rightOf(bt).id("trinket_select").img(R.drawable.trinket_0); bt }
+    view += { bt=UIBuilder.button.size(0.15f).alignTop(bt).rightOf(bt).id("trinket_select"); bt }
 
     view.foreach(_.pad())
     view

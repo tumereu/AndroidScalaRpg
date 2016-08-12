@@ -30,7 +30,10 @@ object Drawables {
   val shields = Array[Int](shield_0,shield_1,shield_2,shield_3,shield_4,shield_5,shield_6,shield_7,shield_8)
   val staves = Array[Int](staff_0,staff_1,staff_2,staff_3,staff_4,staff_5,staff_6,staff_7)
   val swords = Array[Int](sword_0,sword_1,sword_2,sword_3,sword_4,sword_5,sword_6,sword_7,sword_8,sword_9,sword_10,sword_11,sword_12)
-
+  val wands = Array[Int](wand_0,wand_1,wand_2,wand_3,wand_4,wand_5,wand_6,wand_7,wand_8,wand_9,wand_10,wand_11)
+  val trinkets = Array[Int](trinket_0,trinket_1,trinket_2,trinket_3,trinket_4,trinket_5,trinket_6,trinket_7,trinket_8,trinket_9,trinket_10,trinket_11,
+    trinket_12,trinket_13,trinket_14,trinket_15,trinket_16,trinket_17,trinket_18,trinket_19,trinket_20,trinket_21,trinket_22,trinket_23,trinket_24,
+    trinket_25,trinket_26,trinket_27,trinket_28)
 
   def random(array: Array[Int]): Int = array((Math.random() * array.length).toInt)
 

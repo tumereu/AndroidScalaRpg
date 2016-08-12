@@ -14,5 +14,5 @@ object WeaponCategory extends Enumeration {
   val GreatSword = Value("Greatsword")
   val GreatAxe = Value("Greataxe")
   val GreatHammer = Value("Great hammer")
-  val Shield, Focus, Staff, Bow = Value
+  val Shield, Focus, Staff, Bow, Wand = Value
 }

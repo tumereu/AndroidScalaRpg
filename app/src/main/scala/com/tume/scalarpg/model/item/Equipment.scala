@@ -56,7 +56,8 @@ sealed abstract class Equipment(val equipSlot: EquipSlot, val id: Long) extends 
 
 }
 case class Trinket(theGame: TheGame) extends Equipment(EquipSlot.Trinket, theGame.uniqueId) {
-
+  drawable = Drawables.random(Drawables.trinkets)
+  name = EquipmentNames.random(EquipmentNames.trinkets)
 }
 case class Weapon(theGame: TheGame, val category: WeaponCategory) extends Equipment(EquipSlot.Weapon, theGame.uniqueId) {
   name = "" + category
@@ -72,7 +73,19 @@ case class Weapon(theGame: TheGame, val category: WeaponCategory) extends Equipm
     case Shield => Drawables.shields
     case Focus => Drawables.focuses
     case Bow => Drawables.bows
+    case Wand => Drawables.wands
   })
+  override def implicitTooltip = {
+    var s = ""
+    if (implicitAffixes.isEmpty) {
+      ""
+    } else {
+      for (i <- implicitAffixes) {
+        s += i.tooltipLine + "\n "
+      }
+      s
+    }
+  }
 }
 case class Helmet(theGame: TheGame) extends Equipment(EquipSlot.Helmet, theGame.uniqueId) {
   drawable = Drawables.random(Drawables.helmets)
@@ -100,7 +113,7 @@ object Equipment {
 
   def generateTrinket(itemLevel: Int, theGame: TheGame): Trinket = {
     val t = Trinket(theGame)
-
+    t.affixes = t.affixes :+ IncreasedManaAffix(itemLevel)
     t
   }
   def generateWeapon(itemLevel: Int, theGame: TheGame): Weapon = {
@@ -117,7 +130,7 @@ object Equipment {
       case Bow => 0.85f
       case GreatAxe | GreatHammer | GreatSword => 1.6f
       case Shield | Focus => 0f
-      case Staff => 0.6f
+      case Staff | Wand => 0.6f
     }
     if (dmgFactor > 0) {
       val critChance = category match {
@@ -127,6 +140,7 @@ object Equipment {
         case Dagger => 0.1f
         case Staff => 0.02f
         case Bow => 0.08f
+        case Wand => 0.04f
       }
       val accuracy = category match {
         case Mace | Axe => 0.8f
@@ -135,8 +149,9 @@ object Equipment {
         case Dagger => 0.95f
         case Bow => 0.4f
         case Staff => 0.6f
+        case Wand => 0.8f
       }
-      t.implicitAffixes = t.implicitAffixes :+ ImplicitMeleeDamage(dmgFactor, dmgFactor) :+
+      t.implicitAffixes = t.implicitAffixes :+ ImplicitMeleeDamage(dmgFactor, dmgFactor, itemLevel) :+
         ImplicitMeleeCritChance(critChance) :+ ImplicitMeleeAccuracy(accuracy)
     }
     t.affixes = t.affixes :+ IncreasedBaseDamageAffix(itemLevel)

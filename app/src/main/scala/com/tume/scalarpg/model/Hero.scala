@@ -4,14 +4,18 @@ import android.util.Log
 import com.tume.engine.anim.ClampedLinearSpikeAnim
 import com.tume.engine.gui.model.UIModel
 import com.tume.engine.util.{Rand, Calc, Bitmaps}
+import com.tume.scalarpg.model.hero.HeroClass
 import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
 import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
-import com.tume.scalarpg.model.item.{EquipSlot, Equipment}
+import com.tume.scalarpg.model.item.{IncreasedHealthAffix, EquipSlot, Equipment}
 import com.tume.scalarpg.model.potion.{ManaPotion, HealthPotion, Potion}
 import com.tume.scalarpg.model.property.Damage
+import com.tume.scalarpg.model.property.Stat._
 import com.tume.scalarpg.{R, TheGame}
 import com.tume.scalarpg.model.Direction.Direction
 import com.tume.scalarpg.model.property.Element._
+
+import scala.collection.mutable
 
 /**
   * Created by tume on 5/13/16.
@@ -20,15 +24,19 @@ class Hero(game: TheGame) extends Creature(game) {
 
   this.bitmap = Some(Bitmaps.get(R.drawable.hero_warrior))
 
-  var equipment = Map[EquipSlot, Equipment]()
+  var equipment = mutable.Map[EquipSlot, Equipment]()
+
+  var heroClass = new HeroClass()
+
+  var statFactors = mutable.Map[Stat, Float]().withDefault(a => 1f)
 
   var level = 1
   var xp = 0
   def speed = 5f
   def attackSpeed = 1.5f
 
-  override def maxHealth = standardScaling * 100
-  override def maxMana = logarithmicScaling * 100
+  override def maxHealth = standardScaling * heroClass.baseHealth * statFactors(HealthFactor)
+  override def maxMana = logarithmicScaling * heroClass.baseMana * statFactors(ManaFactor)
   def reqXp = (Math.pow(level, 1.4) * 100).toInt
 
   this.health = maxHealth
@@ -111,10 +119,22 @@ class Hero(game: TheGame) extends Creature(game) {
 
   def createStartingEquipment(): Unit = {
     this.equipment += EquipSlot.Helmet -> Equipment.generateArmor(1, theGame, EquipSlot.Helmet)
-    this.equipment += EquipSlot.Body -> Equipment.generateArmor(30, theGame, EquipSlot.Body)
-    this.equipment += EquipSlot.Boots -> Equipment.generateArmor(100, theGame, EquipSlot.Boots)
-    this.equipment += EquipSlot.MainHand -> Equipment.generateWeapon(40, theGame)
+    this.equipment += EquipSlot.Body -> Equipment.generateArmor(1, theGame, EquipSlot.Body)
+    this.equipment += EquipSlot.Boots -> Equipment.generateArmor(1, theGame, EquipSlot.Boots)
+    this.equipment += EquipSlot.MainHand -> Equipment.generateWeapon(1, theGame)
     this.equipment += EquipSlot.OffHand -> Equipment.generateWeapon(1, theGame)
+    this.equipment += EquipSlot.Trinket -> Equipment.generateTrinket(1, theGame)
+
+    this.calculateEquipmentStats()
+  }
+
+  def calculateEquipmentStats(): Unit = {
+    this.statFactors = mutable.Map[Stat, Float]().withDefault(a => 1f)
+    for (eq <- this.equipment.values) {
+      for (a <- eq.affixes) {
+        statFactors(a.stat) = statFactors(a.stat) + a.amount
+      }
+    }
   }
 
 }
