@@ -8,7 +8,8 @@ import com.tume.engine.util.{Bitmaps, Calc, Rand}
 import com.tume.scalarpg.TheGame
 import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
 import com.tume.scalarpg.model.item.WeaponCategory._
-import com.tume.scalarpg.model.property.Element._
+import com.tume.scalarpg.model.property.Elements
+import com.tume.scalarpg.model.property.Elements._
 import com.tume.scalarpg.ui.Drawables
 
 /**
@@ -18,10 +19,11 @@ sealed abstract class Equipment(val equipSlot: EquipSlot, val id: Long) extends 
 
   var name = ""
   var itemLevel = 1
-  var resistances = Map[Element, Float]()
+  var resistances = Map[Element, Int]()
   var implicitAffixes = Vector[ImplicitAffix]()
   var affixes = Vector[NormalAffix]()
   var drawable : Int = 0
+  var rarity: EquipmentRarity = Common
 
   private var description = Option[String](null)
 
@@ -36,6 +38,7 @@ sealed abstract class Equipment(val equipSlot: EquipSlot, val id: Long) extends 
     description
   }
   override def icon: Option[Int] = Some(drawable)
+  override def bgColor : Option[Int] = Some(rarity.color)
 
   def implicitTooltip = ""
 
@@ -45,9 +48,11 @@ sealed abstract class Equipment(val equipSlot: EquipSlot, val id: Long) extends 
     s += name + lb + lb
     s += implicitTooltip
     for (r <- resistances) {
-      s += " +" + Calc.clean(r._2, 1) + "%" + " " + r._1 + " res" + lb
+      s += " +" + r._2 + "%" + " " + r._1 + " res" + lb
     }
-    s += lb
+    if (implicitTooltip.nonEmpty || resistances.nonEmpty) {
+      s += lb
+    }
     for (a <- affixes) {
       s += a.tooltipLine + lb
     }
@@ -100,6 +105,18 @@ case class Boots(theGame: TheGame) extends Equipment(EquipSlot.Boots, theGame.un
   name = EquipmentNames.random(EquipmentNames.boots)
 }
 object Equipment {
+  def generateRarity(itemLevel: Int) : EquipmentRarity = {
+    val offSet = 20
+    Rand.i(itemLevel, itemLevel + offSet) / offSet match {
+      case 0 => Common
+      case 1 => Fine
+      case 2 => Masterwork
+      case 3 => Enchanted
+      case 4 => Mythical
+      case 5 => Forgotten
+      case _ => Ascended
+    }
+  }
   def generateNew(itemLevel: Int, theGame: TheGame) : Equipment = {
     val equipment = Rand.f match {
       case f: Float if f < 0.05f => generateTrinket(itemLevel, theGame)
@@ -114,6 +131,7 @@ object Equipment {
   def generateTrinket(itemLevel: Int, theGame: TheGame): Trinket = {
     val t = Trinket(theGame)
     t.affixes = t.affixes :+ IncreasedManaAffix(itemLevel)
+    t.rarity = generateRarity(itemLevel)
     t
   }
   def generateWeapon(itemLevel: Int, theGame: TheGame): Weapon = {
@@ -124,14 +142,16 @@ object Equipment {
       Rand.from(Seq(Staff))
       ))
     val t = Weapon(theGame, category)
-    val dmgFactor = category match {
+    t.rarity = generateRarity(itemLevel)
+
+    val dmgFactor = (category match {
       case Dagger => 0.8f
       case Sword | Mace | Axe => 1f
       case Bow => 0.85f
       case GreatAxe | GreatHammer | GreatSword => 1.6f
       case Shield | Focus => 0f
       case Staff | Wand => 0.6f
-    }
+    }) * t.rarity.implicitFactor
     if (dmgFactor > 0) {
       val critChance = category match {
         case Mace | GreatHammer => 0.04f
@@ -154,6 +174,19 @@ object Equipment {
       t.implicitAffixes = t.implicitAffixes :+ ImplicitMeleeDamage(dmgFactor, dmgFactor, itemLevel) :+
         ImplicitMeleeCritChance(critChance) :+ ImplicitMeleeAccuracy(accuracy)
     }
+    category match {
+      case Shield => {
+        def addRes(element: Element): Unit = {
+          val res = (Rand.f(0.4f, 0.6f) * (itemLevel + 10)).toInt
+          t.resistances += element -> res
+        }
+        addRes(Physical)
+        for (i <- 0 until t.rarity.resistances) {
+          addRes(Rand.from(Elements.all.filterNot(t.resistances.contains)))
+        }
+      }
+      case _ =>
+    }
     t.affixes = t.affixes :+ IncreasedBaseDamageAffix(itemLevel)
     t
   }
@@ -163,7 +196,16 @@ object Equipment {
       case EquipSlot.Boots => Boots(theGame)
       case _ => BodyArmor(theGame)
     }
-    t.resistances += Physical -> Rand.f(10, 25)
+    t.rarity = generateRarity(itemLevel)
+    def addRes(element: Element): Unit = {
+      val res = (Rand.f(0.8f, 1.2f) * (itemLevel + 10)).toInt
+      t.resistances += element -> res
+    }
+    addRes(Physical)
+    for (i <- 0 until t.rarity.resistances) {
+      addRes(Rand.from(Elements.all.filterNot(t.resistances.contains)))
+    }
+
     t.affixes = t.affixes :+ IncreasedHealthAffix(itemLevel)
     t
   }

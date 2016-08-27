@@ -2,7 +2,7 @@ package com.tume.scalarpg.model
 
 import com.tume.engine.anim.{LoopType, QuinticOutAnim, Animation, EmptyAnim}
 import com.tume.engine.util.{Rand, L, Timer, Bitmaps}
-import com.tume.scalarpg.model.property.Element._
+import com.tume.scalarpg.model.property.Elements._
 import com.tume.scalarpg.model.property.{Damage, DamageRange}
 import com.tume.scalarpg.{R, TheGame}
 

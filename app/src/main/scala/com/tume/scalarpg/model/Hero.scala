@@ -13,7 +13,7 @@ import com.tume.scalarpg.model.property.Damage
 import com.tume.scalarpg.model.property.Stat._
 import com.tume.scalarpg.{R, TheGame}
 import com.tume.scalarpg.model.Direction.Direction
-import com.tume.scalarpg.model.property.Element._
+import com.tume.scalarpg.model.property.Elements._
 
 import scala.collection.mutable
 
@@ -29,6 +29,9 @@ class Hero(game: TheGame) extends Creature(game) {
   var heroClass = new HeroClass()
 
   var statFactors = mutable.Map[Stat, Float]().withDefault(a => 1f)
+  var resistances = mutable.Map[Element, Int]().withDefault(a => 0)
+  var maxResistances = mutable.Map[Element, Int]().withDefault(a => 90)
+
 
   var level = 1
   var xp = 0
@@ -130,9 +133,14 @@ class Hero(game: TheGame) extends Creature(game) {
 
   def calculateEquipmentStats(): Unit = {
     this.statFactors = mutable.Map[Stat, Float]().withDefault(a => 1f)
+    this.resistances = mutable.Map[Element, Int]().withDefault(a => 0)
+    this.maxResistances = mutable.Map[Element, Int]().withDefault(a => 90)
     for (eq <- this.equipment.values) {
       for (a <- eq.affixes) {
         statFactors(a.stat) = statFactors(a.stat) + a.amount
+      }
+      for (a <- eq.resistances) {
+        resistances(a._1) = Calc.min(resistances(a._1) + a._2, maxResistances(a._1))
       }
     }
   }

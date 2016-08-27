@@ -10,7 +10,7 @@ import com.tume.engine.util.{Rand, Calc, Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
 import com.tume.scalarpg.model.item.EquipSlot
 import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, HealthPotion}
-import com.tume.scalarpg.model.property.{Healing, Damage}
+import com.tume.scalarpg.model.property.{Elements, Healing, Damage}
 import com.tume.scalarpg.ui._
 import com.tume.engine.effect._
 
@@ -209,11 +209,15 @@ class TheGame extends Game {
 
     gameCanvas.game = Some(this)
     findUIComponent[UIProgressBar]("timeBar").updateRawProgress(Some(currentTime / roundTime))
+    findUIComponent[UIPanel]("stage_select_panel").register(new Area())
 
     refreshHeroUI()
   }
 
   def refreshHeroUI(): Unit = {
+    import Calc._
+    import Elements._
+
     findUIComponent[UIButton]("armor_select").register(this.player.equipment(EquipSlot.Body))
     findUIComponent[UIButton]("boots_select").register(this.player.equipment(EquipSlot.Boots))
     findUIComponent[UIButton]("helmet_select").register(this.player.equipment(EquipSlot.Helmet))
@@ -221,7 +225,16 @@ class TheGame extends Game {
     findUIComponent[UIButton]("off_weapon_select").register(this.player.equipment(EquipSlot.OffHand))
     findUIComponent[UIButton]("trinket_select").register(this.player.equipment(EquipSlot.Trinket))
 
-    findUIComponent[UILabel]("info_health").text = Calc.clean(this.player.maxHealth, 0)
-    findUIComponent[UILabel]("info_mana").text = Calc.clean(this.player.maxMana, 0)
+    findUIComponent[UILabel]("info_health").text = clean(this.player.maxHealth, 0)
+    findUIComponent[UILabel]("info_mana").text = clean(this.player.maxMana, 0)
+
+    findUIComponent[UILabel]("res_physical").text = this.player.resistances(Physical) + "%"
+    findUIComponent[UILabel]("res_fire").text = this.player.resistances(Fire) + "%"
+    findUIComponent[UILabel]("res_frost").text = this.player.resistances(Frost) + "%"
+    findUIComponent[UILabel]("res_lightning").text = this.player.resistances(Electric) + "%"
+    findUIComponent[UILabel]("res_holy").text = this.player.resistances(Holy) + "%"
+    findUIComponent[UILabel]("res_dark").text = this.player.resistances(Dark) + "%"
+    findUIComponent[UILabel]("res_poison").text = this.player.resistances(Poison) + "%"
+    findUIComponent[UILabel]("res_arcane").text = this.player.resistances(Arcane) + "%"
   }
 }

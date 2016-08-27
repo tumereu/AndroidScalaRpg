@@ -6,7 +6,7 @@ import com.tume.engine.util.{Rand, Calc, Bitmaps}
 import com.tume.scalarpg.model.Direction.Direction
 import com.tume.scalarpg.model.property.{Healing, Damage}
 import com.tume.scalarpg.model.property.HealType._
-import com.tume.scalarpg.model.property.Element._
+import com.tume.scalarpg.model.property.Elements._
 import com.tume.scalarpg.{TheGame, R}
 
 /**

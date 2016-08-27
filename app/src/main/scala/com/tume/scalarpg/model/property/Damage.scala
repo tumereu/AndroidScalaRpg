@@ -1,6 +1,6 @@
 package com.tume.scalarpg.model.property
 
-import com.tume.scalarpg.model.property.Element._
+import com.tume.scalarpg.model.property.Elements._
 
 /**
   * Created by tume on 5/13/16.
