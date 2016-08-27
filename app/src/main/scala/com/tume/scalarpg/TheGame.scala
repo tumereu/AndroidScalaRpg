@@ -8,7 +8,7 @@ import com.tume.engine.gui._
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
 import com.tume.engine.util.{Rand, Calc, Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
-import com.tume.scalarpg.model.item.EquipSlot
+import com.tume.scalarpg.model.item._
 import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, HealthPotion}
 import com.tume.scalarpg.model.property.{Elements, Healing, Damage}
 import com.tume.scalarpg.ui._
@@ -28,6 +28,8 @@ class TheGame extends Game {
   var floor = Map[(Int, Int), Tile]()
   var floorWidth, floorHeight = 0
 
+  var inventory = Vector.empty[Equipment]
+
   var player : Hero = null
   var enemies = Vector.empty[Enemy]
 
@@ -35,6 +37,9 @@ class TheGame extends Game {
   var healthPotion, manaPotion, xpPotion : UIButton = null
 
   var gameCanvas : GameCanvas = null
+
+  var selectedAreaIndex = 0
+  def selectedArea = Areas.areas(selectedAreaIndex % Areas.areas.length)
 
   def createFloor(): Unit = {
     floor = Map[(Int, Int), Tile]()
@@ -64,6 +69,10 @@ class TheGame extends Game {
   def danger = currentRound * 2 + 5
 
   def tileAt(loc: (Int, Int)) : Option[Tile] = floor.get(loc)
+
+  def addItem(equipment: Equipment): Unit = {
+    inventory = (inventory :+ equipment).sortBy(a => -(a.rarity.affixes + a.rarity.resistances) * 1000 + a.itemLevel)
+  }
 
   override def update(delta: Float): Unit = {
     super.update(delta)
@@ -179,6 +188,7 @@ class TheGame extends Game {
   override def views: Seq[UIView] = Vector(new HeroUI(), new GameUI())
 
   override def onUIEvent(event: UIEvent): Unit = {
+    super.onUIEvent(event)
     event match {
       case e: ButtonEvent => {
         e.id.get match {
@@ -189,6 +199,16 @@ class TheGame extends Game {
           case "healthPotion" => player.quaffPotion(new HealthPotion().getClass)
           case "manaPotion" => player.quaffPotion(new ManaPotion().getClass)
           case "xpPotion" => player.quaffPotion(new ExperiencePotion().getClass)
+          case "select_prev_stage" => {
+            this.selectedAreaIndex -= 1
+            if (selectedAreaIndex < 0) selectedAreaIndex = Areas.areas.size - 1
+            refreshHeroUI()
+            }
+          case "select_next_stage" => { this.selectedAreaIndex += 1; refreshHeroUI() }
+          case "helmet_select" => showSelectionDialog("item_select", inventory.collect{case h: Helmet => h})
+          case "armor_select" => showSelectionDialog("item_select", inventory.collect{case h: BodyArmor => h})
+          case "boots_select" => showSelectionDialog("item_select", inventory.collect{case h: Boots => h})
+          case "trinket_select" => showSelectionDialog("item_select", inventory.collect{case h: Trinket => h})
           case _ =>
         }
       }
@@ -198,6 +218,10 @@ class TheGame extends Game {
   override def init(): Unit = {
     createFloor()
     this.player.createStartingEquipment()
+
+    for (i <- 0 to 100) {
+      addItem(Equipment.generateNew(1, this))
+    }
 
     gameCanvas = findUIComponent[GameCanvas]("gameCanvas")
     healthBar = findUIComponent[UIProgressBar]("healthBar")
@@ -209,7 +233,9 @@ class TheGame extends Game {
 
     gameCanvas.game = Some(this)
     findUIComponent[UIProgressBar]("timeBar").updateRawProgress(Some(currentTime / roundTime))
-    findUIComponent[UIPanel]("stage_select_panel").register(new Area())
+    findUIComponent[UIPanel]("stage_select_panel").register(this.selectedArea)
+
+    findUIComponent[UIRadioButton]("difficulty_normal").toggle()
 
     refreshHeroUI()
   }
@@ -236,5 +262,11 @@ class TheGame extends Game {
     findUIComponent[UILabel]("res_dark").text = this.player.resistances(Dark) + "%"
     findUIComponent[UILabel]("res_poison").text = this.player.resistances(Poison) + "%"
     findUIComponent[UILabel]("res_arcane").text = this.player.resistances(Arcane) + "%"
+
+    findUIComponent[UIPanel]("stage_select_panel").register(selectedArea)
+    findUIComponent[UILabel]("stage_name").text = selectedArea.name
+    for (i <- 0 to 5) {
+      findUIComponent[UILabel]("info" + i).text = selectedArea.description.lift(i).getOrElse("")
+    }
   }
 }

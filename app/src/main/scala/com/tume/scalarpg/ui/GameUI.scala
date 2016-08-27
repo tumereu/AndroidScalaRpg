@@ -11,13 +11,12 @@ import scala.collection.mutable
   * Created by tume on 5/12/16.
   */
 class GameUI extends UIView {
-  override def name: String = "GameUI"
 
-  override def build: Seq[UIBuilder] = {
-    var view = mutable.Buffer[UIBuilder]()
+  override def build: Seq[UIBuilder[_ <: UIComponent]] = {
+    var view = mutable.Buffer[UIBuilder[_ <: UIComponent]]()
     // Bars
     val timeBar = UIBuilder.progressBar.main(0xff00b7eb, 0xff00ffff).absWidth(1f).height(0.05f).left().top().pad().id("timeBar")
-    val gameCanvas = UIBuilder(new GameCanvas()).absWidth(1f).absHeight(0.55f).left().below(timeBar).id("gameCanvas")
+    val gameCanvas = UIBuilder[GameCanvas](new GameCanvas()).absWidth(1f).absHeight(0.55f).left().below(timeBar).id("gameCanvas")
     view += gameCanvas
     view += timeBar.pad()
     val healthBar = UIBuilder.progressBar.main(0xff089908, 0xff22ff22).tick(0xff990808, 0xffff2222).absWidth(0.7f).height(0.12f).left().below(gameCanvas)

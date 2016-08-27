@@ -4,7 +4,7 @@ import java.net.PasswordAuthentication
 
 import android.graphics.Bitmap
 import com.tume.engine.gui.model.UIModel
-import com.tume.engine.util.{Bitmaps, Calc, Rand}
+import com.tume.engine.util.{L, Bitmaps, Calc, Rand}
 import com.tume.scalarpg.TheGame
 import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
 import com.tume.scalarpg.model.item.WeaponCategory._
@@ -123,7 +123,7 @@ object Equipment {
       case f: Float if f < 0.25f => generateWeapon(itemLevel, theGame)
       case f: Float if f < 0.5f => generateArmor(itemLevel, theGame, EquipSlot.Body)
       case f: Float if f < 0.75f => generateArmor(itemLevel, theGame, EquipSlot.Boots)
-      case _ => generateArmor(itemLevel, theGame, EquipSlot.Helmet)
+      case _ =>  generateArmor(itemLevel, theGame, EquipSlot.Helmet)
     }
     equipment
   }
