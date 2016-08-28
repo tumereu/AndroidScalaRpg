@@ -2,6 +2,8 @@ package com.tume.scalarpg
 
 import android.graphics.{Canvas, Paint}
 import android.util.Log
+import com.tume.engine.gui.model.UIModel
+import com.tume.scalarpg.GameState._
 import com.tume.scalarpg.model.Direction._
 import com.tume.engine.Game
 import com.tume.engine.gui._
@@ -35,6 +37,8 @@ class TheGame extends Game {
 
   var healthBar, manaBar, xpBar : UIProgressBar = null
   var healthPotion, manaPotion, xpPotion : UIButton = null
+
+  var state: GameState = AdventureSelection
 
   var gameCanvas : GameCanvas = null
 
@@ -213,6 +217,26 @@ class TheGame extends Game {
         }
       }
     }
+  }
+
+  def changeState(state: GameState): Unit = {
+    this.state = state
+    state match {
+      case AdventureSelection => uiSystem.show("HeroUI")
+      case Adventuring => uiSystem.show("GameUI")
+    }
+  }
+
+  override def onSelection(id: String, uIModel: UIModel, index: Int): Boolean = {
+    id match {
+      case "item_select" if state == AdventureSelection => {
+        uIModel match {
+          case e: Equipment => this.player.equipItem(e); refreshHeroUI()
+          case _ =>
+        }
+      }
+    }
+    true
   }
 
   override def init(): Unit = {

@@ -5,7 +5,7 @@ import java.net.PasswordAuthentication
 import android.graphics.Bitmap
 import com.tume.engine.gui.model.UIModel
 import com.tume.engine.util.{L, Bitmaps, Calc, Rand}
-import com.tume.scalarpg.TheGame
+import com.tume.scalarpg.{R, TheGame}
 import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
 import com.tume.scalarpg.model.item.WeaponCategory._
 import com.tume.scalarpg.model.property.Elements
@@ -209,5 +209,16 @@ object Equipment {
     t.affixes = t.affixes :+ IncreasedHealthAffix(itemLevel)
     t
   }
+}
+class WoodenEquipment(s: EquipSlot, theGame: TheGame) extends Equipment(s, theGame.uniqueId) {
+  drawable = s match {
+    case EquipSlot.Helmet => R.drawable.ic_silhouette_helmet
+    case EquipSlot.Body => R.drawable.ic_silhouette_armor
+    case EquipSlot.Boots => R.drawable.ic_silhouette_boots
+    case EquipSlot.Trinket => R.drawable.ic_silhouette_trinket
+    case EquipSlot.MainHand => R.drawable.ic_silhouette_sword
+    case EquipSlot.OffHand => R.drawable.ic_silhouette_shield
+  }
 
+  override def tooltip: Option[String] = None
 }

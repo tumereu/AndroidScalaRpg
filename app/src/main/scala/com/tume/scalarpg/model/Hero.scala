@@ -7,7 +7,7 @@ import com.tume.engine.util.{Rand, Calc, Bitmaps}
 import com.tume.scalarpg.model.hero.HeroClass
 import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
 import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
-import com.tume.scalarpg.model.item.{IncreasedHealthAffix, EquipSlot, Equipment}
+import com.tume.scalarpg.model.item._
 import com.tume.scalarpg.model.potion.{ManaPotion, HealthPotion, Potion}
 import com.tume.scalarpg.model.property.Damage
 import com.tume.scalarpg.model.property.Stat._
@@ -24,14 +24,13 @@ class Hero(game: TheGame) extends Creature(game) {
 
   this.bitmap = Some(Bitmaps.get(R.drawable.hero_warrior))
 
-  var equipment = mutable.Map[EquipSlot, Equipment]()
+  var equipment = mutable.Map[EquipSlot, Equipment]().withDefault(s => new WoodenEquipment(s, game))
 
   var heroClass = new HeroClass()
 
   var statFactors = mutable.Map[Stat, Float]().withDefault(a => 1f)
   var resistances = mutable.Map[Element, Int]().withDefault(a => 0)
   var maxResistances = mutable.Map[Element, Int]().withDefault(a => 90)
-
 
   var level = 1
   var xp = 0
@@ -121,14 +120,18 @@ class Hero(game: TheGame) extends Creature(game) {
   }
 
   def createStartingEquipment(): Unit = {
-    this.equipment += EquipSlot.Helmet -> Equipment.generateArmor(1, theGame, EquipSlot.Helmet)
-    this.equipment += EquipSlot.Body -> Equipment.generateArmor(1, theGame, EquipSlot.Body)
-    this.equipment += EquipSlot.Boots -> Equipment.generateArmor(1, theGame, EquipSlot.Boots)
-    this.equipment += EquipSlot.MainHand -> Equipment.generateWeapon(1, theGame)
-    this.equipment += EquipSlot.OffHand -> Equipment.generateWeapon(1, theGame)
-    this.equipment += EquipSlot.Trinket -> Equipment.generateTrinket(1, theGame)
-
     this.calculateEquipmentStats()
+  }
+
+  def equipItem(item: Equipment, mainSlot: Boolean = true): Unit = {
+    item match {
+      case w: Weapon => {
+        if (mainSlot) this.equipment(EquipSlot.MainHand) = w
+        else this.equipment(EquipSlot.OffHand) = w
+      }
+      case e: Equipment => this.equipment(e.equipSlot) = e
+    }
+    calculateEquipmentStats()
   }
 
   def calculateEquipmentStats(): Unit = {
