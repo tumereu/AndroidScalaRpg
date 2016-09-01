@@ -3,6 +3,7 @@ package com.tume.scalarpg
 import android.graphics.{Canvas, Paint}
 import android.util.Log
 import com.tume.engine.gui.model.UIModel
+import com.tume.engine.model.Vec2
 import com.tume.scalarpg.GameState._
 import com.tume.scalarpg.model.Direction._
 import com.tume.engine.Game
@@ -16,8 +17,6 @@ import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, Hea
 import com.tume.scalarpg.model.property.{Elements, Healing, Damage}
 import com.tume.scalarpg.ui._
 import com.tume.engine.effect._
-
-import scala.util.Random
 
 /**
   * Created by tume on 5/11/16.
@@ -40,6 +39,8 @@ class TheGame extends Game {
   var healthBar, manaBar, xpBar : UIProgressBar = null
   var healthPotion, manaPotion, xpPotion : UIButton = null
 
+  var lootGiven = 1
+
   var state: GameState = AdventureSelection
   var selectMainSlot = false
 
@@ -49,6 +50,9 @@ class TheGame extends Game {
   def selectedArea = Areas.areas(selectedAreaIndex % Areas.areas.length)
 
   def createFloor(): Unit = {
+    this.currentTime = 0f
+    this.currentRound = 1
+    this.enemies = Vector.empty
     floor = Map[(Int, Int), Tile]()
     for (x <- 0 until floorWidth; y <- 0 until floorHeight) {
       floor += (x, y) -> new Tile(x, y, Rand.from(selectedArea.floorDrawables))
@@ -129,9 +133,9 @@ class TheGame extends Game {
   }
 
   def addEnemyToPlayerDamageObject(damage: Damage, loc: Tile): Unit = {
-    val target = (healthBar.x.toFloat + healthBar.width / 2, healthBar.y.toFloat + healthBar.height / 2)
+    val target = Vec2(healthBar.x.toFloat + healthBar.width / 2, healthBar.y.toFloat + healthBar.height / 2)
     val start = gameCanvas.coordinatesForLocation(loc)
-    val effect = new HomingTextObject(Colors.dmgPaint(damage), damage.cleanAmount, start,
+    val effect = new HomingTextObject(Colors.dmgPaint(damage.crit), damage.cleanAmount, start,
       target, 45f * DisplayUtils.scale, (0.7f + Math.random() * 0.3f).toFloat)
     effect.onRemove = () => {
       healthBar.tick()
@@ -140,8 +144,9 @@ class TheGame extends Game {
     effectSystem.add(effect)
   }
 
-  def addPlayerToEnemyDamageObject(damage: Damage, loc: Tile): Unit = {
-    val effect = new FloatingTextObject(Colors.dmgPaint(damage), damage.cleanAmount, gameCanvas.coordinatesForLocation(loc),
+  def addPlayerToEnemyDamageObject(damage: Damage, loc: Tile, miss: Boolean): Unit = {
+    val text = if (miss) "Miss" else damage.cleanAmount
+    val effect = new FloatingTextObject(Colors.dmgPaint(damage), text, gameCanvas.coordinatesForLocation(loc),
       1f, 1f, DisplayUtils.scale * -90f)
     effectSystem.add(effect)
   }
@@ -152,11 +157,36 @@ class TheGame extends Game {
     effectSystem.add(effect)
   }
 
+  def rollLoot(enemy: Enemy): Unit = {
+    if (enemy.elite) {
+      if (Rand.f < Calc.max(0.5f, 5f / lootGiven)) {
+        lootGiven += 1
+        var eq = Equipment.generateNew(selectedArea.itemLevel + enemy.property.difficulty / 20, this)
+        if (lootGiven == 2) {
+          while (!eq.isInstanceOf[Weapon] || eq.asInstanceOf[Weapon].category != WeaponCategory.Sword) {
+            eq = Equipment.generateNew(selectedArea.itemLevel + enemy.property.difficulty / 20, this)
+          }
+        }
+        effectSystem.add(new FloatingTextObject(Colors.rarityPaint(eq.rarity), eq.name, gameCanvas.coordinatesForLocation(player.currentTile.get),
+          1f, 1f, DisplayUtils.scale * -90f))
+        addItem(eq)
+      }
+    }
+  }
+
+  def playerDied(): Unit = {
+    changeState(GameState.AdventureSelection)
+  }
+
   def creatureDied(c: Creature): Unit = {
     enemies = enemies.filterNot(_ == c)
     if (player != c) c.currentTile.get.removeObject(c)
+    else playerDied()
     c match {
-      case e: Enemy => player.gainXp(e.property.xp)
+      case e: Enemy => {
+        player.gainXp(e.property.xp)
+        rollLoot(e)
+      }
       case _ =>
     }
   }
@@ -245,8 +275,14 @@ class TheGame extends Game {
   def changeState(state: GameState): Unit = {
     this.state = state
     state match {
-      case AdventureSelection => uiSystem.show("HeroUI")
-      case Adventuring => uiSystem.show("GameUI")
+      case AdventureSelection => {
+        player = new Hero(this, player.heroClass)
+        uiSystem.show("HeroUI")
+      }
+      case Adventuring => {
+        player.reset()
+        uiSystem.show("GameUI")
+      }
     }
   }
 
@@ -266,7 +302,6 @@ class TheGame extends Game {
     player = new Hero(this, Rand.from(HeroClasses.list))
 
     createFloor()
-    this.player.createStartingEquipment()
 
     gameCanvas = findUIComponent[GameCanvas]("gameCanvas")
     healthBar = findUIComponent[UIProgressBar]("healthBar")

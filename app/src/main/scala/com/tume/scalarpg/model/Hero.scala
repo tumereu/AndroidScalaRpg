@@ -61,8 +61,9 @@ class Hero(game: TheGame, val heroClass: HeroClass) extends Creature(game) {
         val enemy = tile.get.objects.find(_.isInstanceOf[Enemy])
         if (enemy.isDefined) {
           val dmg = this.calculateBasicAttackDamage
-          game.addPlayerToEnemyDamageObject(dmg, enemy.get.currentTile.get)
-          enemy.get.asInstanceOf[Enemy].takeDamage(dmg)
+          val miss = Rand.f > currentAttack.accuracy
+          game.addPlayerToEnemyDamageObject(dmg, enemy.get.currentTile.get, miss)
+          if (!miss) enemy.get.asInstanceOf[Enemy].takeDamage(dmg)
           game.playerActionDone(1f / attackSpeed)
           animLoc = Some(tile.get.loc)
           moveAnim = ClampedLinearSpikeAnim(0.15f, 5f)
@@ -89,9 +90,12 @@ class Hero(game: TheGame, val heroClass: HeroClass) extends Creature(game) {
 
   def update(delta: Double): Unit = { }
 
+  def currentAttack = this.attacks(attackCounter % attacks.length)
+
   override def calculateBasicAttackDamage : Damage = {
-    val a = this.attacks(attackCounter % attacks.length)
-    Damage(Rand.f(standardScaling * a.minDamage, standardScaling * a.maxDamage), Physical)
+    val a = currentAttack
+    val d = Damage(Rand.f(standardScaling * a.minDamage, standardScaling * a.maxDamage), Physical)
+    if (Rand.f < a.critChance) d.crit else d
   }
 
   def gainXp(xp: Int): Unit = {
@@ -127,8 +131,12 @@ class Hero(game: TheGame, val heroClass: HeroClass) extends Creature(game) {
     }
   }
 
-  def createStartingEquipment(): Unit = {
+  def reset(): Unit = {
     this.calculateEquipmentStats()
+    this.health = maxHealth
+    this.mana = maxMana
+    this.level = 1
+    this.xp = 0
   }
 
   def equipItem(item: Equipment, mainSlot: Boolean = true): Unit = {
@@ -183,13 +191,14 @@ class Hero(game: TheGame, val heroClass: HeroClass) extends Creature(game) {
       max *= statFactors(BaseDamageFactor)
       crit *= statFactors(AttackCritFactor)
       acc = 1f - ((1f - acc) / statFactors(AccuracyFactor))
+      L(acc)
       attacks = attacks :+ new BasicAttack(min, max, crit, acc)
     }
     if (attacks.isEmpty) { // No weapons, we create an attack with our fists
       val min = 1f * statFactors(BaseDamageFactor)
       val max = 2f * statFactors(BaseDamageFactor)
       val crit = 0.005f * statFactors(AttackCritFactor)
-      val acc = 1f - (0.75f / statFactors(AccuracyFactor))
+      val acc = 1f - (0.05f / statFactors(AccuracyFactor))
       attacks = attacks :+ new BasicAttack(min, max, crit, acc)
     } else if (attacks.size == 2) { // Dual wielding increases attack speed by 30%
       statFactors(AttackSpeedFactor) *= 1.3f

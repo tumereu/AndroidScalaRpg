@@ -3,7 +3,7 @@ package com.tume.scalarpg.model
 import com.tume.engine.anim.{LoopType, QuinticOutAnim, Animation, EmptyAnim}
 import com.tume.engine.util.{Rand, L, Timer, Bitmaps}
 import com.tume.scalarpg.model.property.Elements._
-import com.tume.scalarpg.model.property.{Damage, DamageRange}
+import com.tume.scalarpg.model.property.{Elements, Damage, DamageRange}
 import com.tume.scalarpg.{R, TheGame}
 
 /**
@@ -11,15 +11,23 @@ import com.tume.scalarpg.{R, TheGame}
   */
 class Enemy(val game: TheGame, val property: EnemyProperty) extends Creature(game) {
 
+  val elite = Rand.f < 0.1f
+
+  val element = if (!elite) property.dmg.element else Rand.from(Elements.all)
+
+  def healthFactor = if (elite) 5f else 1f
+  def dmgFactor = if (elite) 2.5f else 1f
+  def sizeFactor = if (elite) 1.25f else 1f
+
   var spawnAnimation = Animation()
 
   var attackTimer = new Timer(property.attackSpeed)
-  override def maxHealth = property.hp
-  override def maxMana = property.mana
+  override def maxHealth = property.hp * healthFactor
+  override def maxMana = property.mana * healthFactor
   this.health = maxHealth
   this.mana = maxMana
 
-  override def relativeSize = spawnAnimation.value(property.size)
+  override def relativeSize = spawnAnimation.value(property.size) * sizeFactor
 
   this.bitmap = Some(Bitmaps.get(property.ic))
 
@@ -36,7 +44,7 @@ class Enemy(val game: TheGame, val property: EnemyProperty) extends Creature(gam
     super.roundEnded(game)
   }
 
-  override def calculateBasicAttackDamage: Damage = Damage(Rand.f(property.dmg.min, property.dmg.max), property.dmg.element)
+  override def calculateBasicAttackDamage: Damage = Damage(Rand.f(property.dmg.min * dmgFactor, property.dmg.max * dmgFactor), element)
 
   override def turnEnded(game: TheGame, timeDelta: Float): Unit = {
     super.turnEnded(game, timeDelta)
@@ -48,11 +56,3 @@ class Enemy(val game: TheGame, val property: EnemyProperty) extends Creature(gam
 }
 class EnemyProperty(val difficulty: Int, val name: String, val ic: Int, val hp: Int, val mana: Int = 0, val dmg: DamageRange, val attackSpeed : Float,
                     val xp: Int, val size: Float = TileObject.relativeSize) {}
-object Enemies {
-  val types = Vector[EnemyProperty](
-    new EnemyProperty(0, "Green lizard", R.drawable.en_green_lizard, hp=20, mana=0, DamageRange(0,1.5f), 6f, xp=20, size=0.6f),
-    new EnemyProperty(18, "Alligator", R.drawable.en_alligator, hp=30, mana=0, DamageRange(5,8), 7f, xp=50, size=0.75f),
-    new EnemyProperty(45, "Merman brute", R.drawable.en_merfolk_plain, hp=65, mana=0, DamageRange(12,15), 5f, xp=150, size=0.7f)
-  ).sortBy(_.difficulty)
-  def byDanger(danger: Int) = types.filter(_.difficulty <= danger).last
-}

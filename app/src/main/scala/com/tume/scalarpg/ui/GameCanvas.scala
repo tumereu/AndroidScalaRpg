@@ -2,6 +2,7 @@ package com.tume.scalarpg.ui
 
 import android.graphics.Canvas
 import com.tume.engine.gui.UIComponent
+import com.tume.engine.model.Vec2
 import com.tume.scalarpg.TheGame
 import com.tume.scalarpg.model.Tile
 
@@ -45,9 +46,9 @@ class GameCanvas extends UIComponent {
   def translateX = width.toFloat / 2 - (mapWidth * scaling / 2)
   def translateY = height.toFloat / 2 - (mapHeight * scaling / 2)
 
-  def coordinatesForLocation(loc: (Int, Int)) : (Float, Float) = {
-    (x + translateX + Tile.size * (loc._1 + 0.5f) * scaling, y + translateY + Tile.size * (loc._2 + 0.5f) * scaling)
+  def coordinatesForLocation(loc: (Int, Int)) : Vec2 = {
+    Vec2(x + translateX + Tile.size * (loc._1 + 0.5f) * scaling, y + translateY + Tile.size * (loc._2 + 0.5f) * scaling)
   }
 
-  def coordinatesForLocation(tile: Tile) : (Float, Float) = coordinatesForLocation((tile.x, tile.y))
+  def coordinatesForLocation(tile: Tile) : Vec2 = coordinatesForLocation((tile.x, tile.y))
 }
