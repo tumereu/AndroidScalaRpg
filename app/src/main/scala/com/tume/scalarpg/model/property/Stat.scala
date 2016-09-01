@@ -6,5 +6,5 @@ package com.tume.scalarpg.model.property
   */
 object Stat extends Enumeration {
   type Stat = Value
-  val HealthFactor, ManaFactor, BaseDamageFactor, AccuracyFactor, AttackCritFactor, SpellCritFactor = Value
+  val HealthFactor, ManaFactor, BaseDamageFactor, AccuracyFactor, AttackCritFactor, SpellCritFactor, AttackSpeedFactor, AbilityPower, AbilityPowerFactor = Value
 }

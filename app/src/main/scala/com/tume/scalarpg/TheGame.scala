@@ -10,6 +10,7 @@ import com.tume.engine.gui._
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
 import com.tume.engine.util.{Rand, Calc, Bitmaps, DisplayUtils}
 import com.tume.scalarpg.model._
+import com.tume.scalarpg.model.hero.HeroClasses
 import com.tume.scalarpg.model.item._
 import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, HealthPotion}
 import com.tume.scalarpg.model.property.{Elements, Healing, Damage}
@@ -28,7 +29,8 @@ class TheGame extends Game {
   var currentRound = 1
 
   var floor = Map[(Int, Int), Tile]()
-  var floorWidth, floorHeight = 0
+  def floorWidth = selectedArea.width
+  def floorHeight = selectedArea.height
 
   var inventory = Vector.empty[Equipment]
 
@@ -39,6 +41,7 @@ class TheGame extends Game {
   var healthPotion, manaPotion, xpPotion : UIButton = null
 
   var state: GameState = AdventureSelection
+  var selectMainSlot = false
 
   var gameCanvas : GameCanvas = null
 
@@ -47,29 +50,33 @@ class TheGame extends Game {
 
   def createFloor(): Unit = {
     floor = Map[(Int, Int), Tile]()
-    floorWidth = 6
-    floorHeight = 6
     for (x <- 0 until floorWidth; y <- 0 until floorHeight) {
-      floor += (x, y) -> new Tile(x, y, Drawables.random(Drawables.floorsSandStone))
+      floor += (x, y) -> new Tile(x, y, Rand.from(selectedArea.floorDrawables))
     }
-    player = new Hero(this)
     floor((3,4)).addObject(player)
-    floor((1, 1)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
-    floor((2, 1)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
-    floor((1, 2)).addObject(new Wall(Drawables.random(Drawables.wallsStoneBrown)))
+    for (i <- 0 until Rand.i(selectedArea.wallAmount._1 , selectedArea.wallAmount._2)) {
+      var t = Option[Tile](null)
+      while (t.isEmpty) {
+        t = floor.lift(Rand.i(floorWidth), Rand.i(floorHeight))
+        if (t.get.objects.nonEmpty) {
+          t = None
+        }
+      }
+      t.get.addObject(new Wall(Rand.from(selectedArea.wallDrawables)))
+    }
     spawnRoundEnemies()
   }
 
   def spawnRoundEnemies(): Unit = {
     var spawned = 1
-    for (i <- 1 to 7 + currentRound * 3) {
+    for (i <- 1 to 7 + currentRound) {
       if (tryToSpawnEnemy(spawned)) {
         spawned += 1
       }
     }
   }
 
-  def roundTime = player.speed * fullTurnsInRound
+  def roundTime = fullTurnsInRound
   def danger = currentRound * 2 + 5
 
   def tileAt(loc: (Int, Int)) : Option[Tile] = floor.get(loc)
@@ -178,7 +185,7 @@ class TheGame extends Game {
     if (Math.random() < 1f / n || this.enemies.isEmpty) {
       val d = this.danger * 10 / (9 + n)
       val dang = Math.min(Rand.i(this.danger * 7 / 10, d), Rand.i(this.danger * 7 / 10, d))
-      spawn(new Enemy(this, Enemies.byDanger(dang)))
+      spawn(new Enemy(this, selectedArea.byDanger(dang)))
       true
     } else {
       false
@@ -213,6 +220,22 @@ class TheGame extends Game {
           case "armor_select" => showSelectionDialog("item_select", inventory.collect{case h: BodyArmor => h})
           case "boots_select" => showSelectionDialog("item_select", inventory.collect{case h: Boots => h})
           case "trinket_select" => showSelectionDialog("item_select", inventory.collect{case h: Trinket => h})
+          case "main_weapon_select" => {
+            selectMainSlot = true
+            showSelectionDialog("item_select", inventory.collect{case h: Weapon => h}.filter(p => {
+              player.heroClass.mainHandWeapons.contains(p.category) && player.equipment(EquipSlot.OffHand) != p
+            }))
+          }
+          case "off_weapon_select" => {
+            selectMainSlot = false
+            showSelectionDialog("item_select", inventory.collect{case h: Weapon => h}.filter(p => {
+              player.heroClass.offHandWeapons.contains(p.category) && player.equipment(EquipSlot.MainHand) != p
+            }))
+          }
+          case "start_level" => {
+            createFloor()
+            changeState(GameState.Adventuring)
+          }
           case _ =>
         }
       }
@@ -231,7 +254,7 @@ class TheGame extends Game {
     id match {
       case "item_select" if state == AdventureSelection => {
         uIModel match {
-          case e: Equipment => this.player.equipItem(e); refreshHeroUI()
+          case e: Equipment => this.player.equipItem(e, this.selectMainSlot); refreshHeroUI()
           case _ =>
         }
       }
@@ -240,12 +263,10 @@ class TheGame extends Game {
   }
 
   override def init(): Unit = {
+    player = new Hero(this, Rand.from(HeroClasses.list))
+
     createFloor()
     this.player.createStartingEquipment()
-
-    for (i <- 0 to 100) {
-      addItem(Equipment.generateNew(1, this))
-    }
 
     gameCanvas = findUIComponent[GameCanvas]("gameCanvas")
     healthBar = findUIComponent[UIProgressBar]("healthBar")
@@ -261,6 +282,8 @@ class TheGame extends Game {
 
     findUIComponent[UIRadioButton]("difficulty_normal").toggle()
 
+    player.calculateEquipmentStats()
+
     refreshHeroUI()
   }
 
@@ -275,8 +298,16 @@ class TheGame extends Game {
     findUIComponent[UIButton]("off_weapon_select").register(this.player.equipment(EquipSlot.OffHand))
     findUIComponent[UIButton]("trinket_select").register(this.player.equipment(EquipSlot.Trinket))
 
+    findUIComponent[UILabel]("class_name").text = player.heroClass.name
+
     findUIComponent[UILabel]("info_health").text = clean(this.player.maxHealth, 0)
     findUIComponent[UILabel]("info_mana").text = clean(this.player.maxMana, 0)
+    findUIComponent[UILabel]("info_attack_speed").text = clean(this.player.attackSpeed, 1)
+    findUIComponent[UILabel]("info_speed").text = clean(this.player.movementSpeed, 1)
+    findUIComponent[UILabel]("info_ability_power").text = clean(this.player.abilityPower, 0)
+    findUIComponent[UILabel]("info_damage").text = player.attacks.map(a => clean(a.minDamage, 0) + "-" + clean(a.maxDamage, 0)).mkString("/")
+    findUIComponent[UILabel]("info_crit_chance").text = player.attacks.map(a => clean(a.critChance * 100, 1)).mkString("/") + "%"
+    findUIComponent[UILabel]("info_accuracy").text = player.attacks.map(a => clean(a.accuracy * 100, 1)).mkString("/") + "%"
 
     findUIComponent[UILabel]("res_physical").text = this.player.resistances(Physical) + "%"
     findUIComponent[UILabel]("res_fire").text = this.player.resistances(Fire) + "%"

@@ -91,6 +91,14 @@ case class Weapon(theGame: TheGame, val category: WeaponCategory) extends Equipm
       s
     }
   }
+  def twoHanded = category match {
+    case GreatSword | GreatAxe | GreatHammer | Staff | Bow => true
+    case _ => false
+  }
+  def isWeapon = category match {
+    case Shield | Focus => false
+    case _ => true
+  }
 }
 case class Helmet(theGame: TheGame) extends Equipment(EquipSlot.Helmet, theGame.uniqueId) {
   drawable = Drawables.random(Drawables.helmets)

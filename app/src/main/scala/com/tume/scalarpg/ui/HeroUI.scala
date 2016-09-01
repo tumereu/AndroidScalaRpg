@@ -26,14 +26,14 @@ class HeroUI extends UIView {
     var bt: UIButtonBuilder[_ <: UIButton] = UIBuilder.button
     var name = UIBuilder.label
     var stage = UIBuilder.panel
-    var info = UIBuilder.panel
+    val info = UIBuilder.panel
 
     // Hero and sign select buttons and stat panel
     view += {heroSelect = UIBuilder.button.size(0.35f/2).top().left().id("hero_select").img(R.drawable.hero_warrior); heroSelect }
     view += { panel=UIBuilder.panel.width(1f-0.35f/2).height(0.35f).top().right(); panel }
     view += UIBuilder.button.size(0.35f/2).alignBottom(panel).left().id("sign_select")
     // Name
-    view += { lab=UIBuilder.label.text("Warrior").height(0.08f).width(0.8f).alignLeft(panel, 0.02f).alignTop(panel, 0.005f); name=lab; lab }
+    view += { lab=UIBuilder.label.text("Warrior").height(0.08f).width(0.8f).alignLeft(panel, 0.02f).alignTop(panel, 0.005f); name=lab; lab }.id("class_name")
     // Stats row 1
     view += { lab=UIBuilder.label.img(R.drawable.ic_heart).text("122").height(lh).width(sw).alignLeft(panel, 0.02f).below(name, 0.01f); first=lab; lab }.id("info_health")
     view += { lab=UIBuilder.label.img(R.drawable.ic_sword).text("2-5").height(lh).width(sw).alignLeft(panel, 0.02f).below(lab); lab }.id("info_damage")
