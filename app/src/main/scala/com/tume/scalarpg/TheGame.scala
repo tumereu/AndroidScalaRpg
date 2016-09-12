@@ -9,19 +9,22 @@ import com.tume.scalarpg.model.Direction._
 import com.tume.engine.Game
 import com.tume.engine.gui._
 import com.tume.engine.gui.event.{ButtonEvent, UIEvent}
-import com.tume.engine.util.{Rand, Calc, Bitmaps, DisplayUtils}
+import com.tume.engine.util._
 import com.tume.scalarpg.model._
-import com.tume.scalarpg.model.hero.HeroClasses
+import com.tume.scalarpg.model.hero.{TargetingType, Ability, HeroClasses}
 import com.tume.scalarpg.model.item._
 import com.tume.scalarpg.model.potion.{ExperiencePotion, ManaPotion, Potion, HealthPotion}
 import com.tume.scalarpg.model.property.{Elements, Healing, Damage}
 import com.tume.scalarpg.ui._
 import com.tume.engine.effect._
+import com.tume.scalarpg.model.hero.LosType._
+
+import scala.collection.mutable
 
 /**
   * Created by tume on 5/11/16.
   */
-class TheGame extends Game {
+class TheGame extends Game with LosMap {
 
   var currentTime = 0f
   var fullTurnsInRound = 10
@@ -49,6 +52,10 @@ class TheGame extends Game {
   var selectedAreaIndex = 0
   def selectedArea = Areas.areas(selectedAreaIndex % Areas.areas.length)
 
+  var selectedAbility = Option[Ability](null)
+  var selectedTarget = Option[(Int, Int)](null)
+  var allowedTargetsMap = mutable.Map[(Int, Int), Boolean]().withDefault(d => false)
+
   def createFloor(): Unit = {
     this.currentTime = 0f
     this.currentRound = 1
@@ -73,7 +80,12 @@ class TheGame extends Game {
 
   def spawnRoundEnemies(): Unit = {
     var spawned = 1
-    for (i <- 1 to 7 + currentRound) {
+    var max = 7
+    for (i <- 1 to currentRound) {
+      if (i <= 5) max += 1
+      else max += i
+    }
+    for (i <- 1 to 7 + max) {
       if (tryToSpawnEnemy(spawned)) {
         spawned += 1
       }
@@ -95,11 +107,11 @@ class TheGame extends Game {
     manaBar.updateProgress(player.mana.toInt, player.maxMana.toInt)
     xpBar.updateProgress(player.xp, player.reqXp)
 
-    healthPotion.cornerText = player.potionAmount(HealthPotion().getClass).toString
+    healthPotion.rightCornerText = Some(player.potionAmount(HealthPotion().getClass).toString, 0xffaaceaa)
     healthPotion.enabled = player.potionAmount(HealthPotion().getClass) > 0
-    manaPotion.cornerText = player.potionAmount(ManaPotion().getClass).toString
+    manaPotion.rightCornerText = Some(player.potionAmount(ManaPotion().getClass).toString, 0xffaaceaa)
     manaPotion.enabled = player.potionAmount(ManaPotion().getClass) > 0
-    xpPotion.cornerText = player.potionAmount(ExperiencePotion().getClass).toString
+    xpPotion.rightCornerText = Some(player.potionAmount(ExperiencePotion().getClass).toString, 0xffaaceaa)
     xpPotion.enabled = player.potionAmount(ExperiencePotion().getClass) > 0
 
     player.update(delta)
@@ -222,6 +234,15 @@ class TheGame extends Game {
     }
   }
 
+  override def width : Int = floorWidth
+  override def height: Int = floorHeight
+  override def transparent(x: Int, y: Int): Boolean = selectedAbility.get.losType match {
+    case NothingBlocks => true
+    case WallsBlock => !floor((x, y)).objects.exists(_.isInstanceOf[Wall])
+    case UnpassablesBlock => !floor((x, y)).objects.exists(!_.isPassable)
+    case EverythingBlocks => floor((x, y)).objects.isEmpty
+  }
+
   override def render(canvas: Canvas): Unit = {
     super.render(canvas)
   }
@@ -240,6 +261,11 @@ class TheGame extends Game {
           case "healthPotion" => player.quaffPotion(new HealthPotion().getClass)
           case "manaPotion" => player.quaffPotion(new ManaPotion().getClass)
           case "xpPotion" => player.quaffPotion(new ExperiencePotion().getClass)
+          case "ability_0" => selectAbility(0)
+          case "ability_1" => selectAbility(1)
+          case "ability_2" => selectAbility(2)
+          case "ability_3" => selectAbility(3)
+          case "ability_4" => selectAbility(4)
           case "select_prev_stage" => {
             this.selectedAreaIndex -= 1
             if (selectedAreaIndex < 0) selectedAreaIndex = Areas.areas.size - 1
@@ -263,7 +289,6 @@ class TheGame extends Game {
             }))
           }
           case "start_level" => {
-            createFloor()
             changeState(GameState.Adventuring)
           }
           case _ =>
@@ -272,16 +297,41 @@ class TheGame extends Game {
     }
   }
 
+  def selectAbility(index: Int): Unit = {
+    selectedAbility = player.heroClass.abilities.lift(index)
+    selectedAbility match {
+      case Some(ab) => {
+        allowedTargetsMap = Los.map(player.currentTile.get.x, player.currentTile.get.y, this)
+        for (x <- 0 until floorWidth; y <- 0 until floorHeight) {
+          allowedTargetsMap((x, y)) = allowedTargetsMap((x, y)) && (ab.targetingType match {
+            case TargetingType.Creature => tileAt(x, y).get.objects.exists(_.isInstanceOf[Creature])
+            case TargetingType.Enemy => tileAt(x, y).get.objects.exists(_.isInstanceOf[Enemy])
+            case TargetingType.Ally => ???
+            case TargetingType.Tile => true
+            case TargetingType.EmptyTile => tileAt(x, y).get.objects.isEmpty
+            case _ => true
+          })
+        }
+      }
+      case None =>
+    }
+  }
+
   def changeState(state: GameState): Unit = {
     this.state = state
     state match {
       case AdventureSelection => {
         player = new Hero(this, player.heroClass)
+        restoreEquipment()
         uiSystem.show("HeroUI")
+        refreshHeroUI()
       }
       case Adventuring => {
+        createFloor()
+        inventory.foreach(_.isNew = false)
         player.reset()
         uiSystem.show("GameUI")
+        refreshGameUI()
       }
     }
   }
@@ -296,6 +346,15 @@ class TheGame extends Game {
       }
     }
     true
+  }
+
+  def restoreEquipment(): Unit = {
+    for (t <- player.heroClass.savedEquipment) {
+      val eq = inventory.find(_.id == t._2)
+      if (eq.isDefined) player.equipment(t._1) = eq.get
+    }
+    player.calculateEquipmentStats()
+    refreshHeroUI()
   }
 
   override def init(): Unit = {
@@ -320,6 +379,16 @@ class TheGame extends Game {
     player.calculateEquipmentStats()
 
     refreshHeroUI()
+    refreshGameUI()
+  }
+
+  def refreshGameUI(): Unit = {
+    for (ai <- player.heroClass.abilities.zipWithIndex) {
+      val ability = ai._1
+      val index = ai._2
+      findUIComponent[UIButton]("ability_" + index).register(ability)
+    }
+    findUIComponent[UIButton]("ability_0")
   }
 
   def refreshHeroUI(): Unit = {
@@ -357,6 +426,14 @@ class TheGame extends Game {
     findUIComponent[UILabel]("stage_name").text = selectedArea.name
     for (i <- 0 to 5) {
       findUIComponent[UILabel]("info" + i).text = selectedArea.description.lift(i).getOrElse("")
+    }
+  }
+
+  override def onBackPressed(): Unit = {
+    state match {
+      case Adventuring => changeState(AdventureSelection)
+      case AdventureSelection => System.exit(0)
+      case _ =>
     }
   }
 }

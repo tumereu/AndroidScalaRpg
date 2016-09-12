@@ -1,7 +1,11 @@
 package com.tume.scalarpg.model.hero
 
 import com.tume.scalarpg.R
+import com.tume.scalarpg.model.hero.ability.Charge
+import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
 import com.tume.scalarpg.model.item.WeaponCategory._
+
+import scala.collection.mutable
 
 
 /**
@@ -20,9 +24,10 @@ class HeroClass {
 
   var mainHandWeapons = Vector.empty[WeaponCategory]
   var offHandWeapons = Vector.empty[WeaponCategory]
+
+  var savedEquipment = mutable.Map[EquipSlot, Long]().withDefault(d => -1L)
 }
 object HeroClasses {
-
   val list = Vector[HeroClass](
     new HeroClass() {
       name = "Warrior"
@@ -35,6 +40,7 @@ object HeroClasses {
       baseAbilityPower = 0
       mainHandWeapons = Vector(Sword, Axe, Mace, Dagger, GreatAxe, GreatHammer, GreatSword)
       offHandWeapons = Vector(Sword, Axe, Mace, Dagger, Shield)
+      abilities = Vector(new Charge())
     }
   )
 }

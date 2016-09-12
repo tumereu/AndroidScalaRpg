@@ -22,6 +22,8 @@ import scala.collection.mutable
   */
 class Hero(game: TheGame, val heroClass: HeroClass) extends Creature(game) {
 
+  heroClass.abilities.foreach(_.user = Some(this))
+
   this.bitmap = Some(Bitmaps.get(heroClass.icon))
 
   var equipment = mutable.Map[EquipSlot, Equipment]().withDefault(s => new WoodenEquipment(s, game))
@@ -54,6 +56,7 @@ class Hero(game: TheGame, val heroClass: HeroClass) extends Creature(game) {
   calculateEquipmentStats()
 
   override def move(dir: Direction): Boolean = {
+    game.selectedAbility = None
     val moved = super.move(dir)
     if (!moved) {
       val tile = theGame.tileAt(Direction.atCoordinates(currentTile.get.location, dir))
@@ -141,7 +144,8 @@ class Hero(game: TheGame, val heroClass: HeroClass) extends Creature(game) {
 
   def equipItem(item: Equipment, mainSlot: Boolean = true): Unit = {
     import EquipSlot._
-
+    item.isNew = false
+    var slot : EquipSlot = item.equipSlot
     item match {
       case w: Weapon => {
         if (w.twoHanded ||
@@ -150,11 +154,13 @@ class Hero(game: TheGame, val heroClass: HeroClass) extends Creature(game) {
           this.equipment.remove(MainHand)
           this.equipment.remove(OffHand)
         }
-        if (mainSlot) this.equipment(MainHand) = w
-        else this.equipment(OffHand) = w
+        if (mainSlot) slot = MainHand
+        else slot = OffHand
       }
-      case e: Equipment => this.equipment(e.equipSlot) = e
+      case e: Equipment => slot = e.equipSlot
     }
+    this.equipment(slot) = item
+    this.heroClass.savedEquipment(slot) = item.id
     calculateEquipmentStats()
   }
 

@@ -3,7 +3,7 @@ package com.tume.scalarpg.model.item
 import java.net.PasswordAuthentication
 
 import android.graphics.Bitmap
-import com.tume.engine.gui.model.UIModel
+import com.tume.engine.gui.model.{ButtonModel, UIModel}
 import com.tume.engine.util.{L, Bitmaps, Calc, Rand}
 import com.tume.scalarpg.{R, TheGame}
 import com.tume.scalarpg.model.item.EquipSlot.EquipSlot
@@ -15,7 +15,7 @@ import com.tume.scalarpg.ui.Drawables
 /**
   * Created by tume on 5/19/16.
   */
-sealed abstract class Equipment(val equipSlot: EquipSlot, val id: Long) extends UIModel  {
+sealed abstract class Equipment(val equipSlot: EquipSlot, val id: Long) extends UIModel with ButtonModel {
 
   var name = ""
   var itemLevel = 1
@@ -24,6 +24,7 @@ sealed abstract class Equipment(val equipSlot: EquipSlot, val id: Long) extends 
   var affixes = Vector[NormalAffix]()
   var drawable : Int = 0
   var rarity: EquipmentRarity = Common
+  var isNew = true
 
   private var description = Option[String](null)
 
@@ -39,6 +40,7 @@ sealed abstract class Equipment(val equipSlot: EquipSlot, val id: Long) extends 
   }
   override def icon: Option[Int] = Some(drawable)
   override def bgColor : Option[Int] = Some(rarity.color)
+  override def rightCornerText = if (!isNew) None else Some("New", 0xffcc0000)
 
   def implicitTooltip = ""
 
@@ -99,6 +101,7 @@ case class Weapon(theGame: TheGame, val category: WeaponCategory) extends Equipm
     case Shield | Focus => false
     case _ => true
   }
+  override def leftCornerText = if (twoHanded) Some("2h", 0xffaaceaa) else None
 }
 case class Helmet(theGame: TheGame) extends Equipment(EquipSlot.Helmet, theGame.uniqueId) {
   drawable = Drawables.random(Drawables.helmets)
@@ -227,6 +230,8 @@ class WoodenEquipment(s: EquipSlot, theGame: TheGame) extends Equipment(s, theGa
     case EquipSlot.MainHand => R.drawable.ic_silhouette_sword
     case EquipSlot.OffHand => R.drawable.ic_silhouette_shield
   }
+
+  isNew = false
 
   override def tooltip: Option[String] = None
 }

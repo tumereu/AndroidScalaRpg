@@ -11,4 +11,5 @@ case class Damage(val amount: Float, val element: Element, isCrit: Boolean = fal
 }
 case class DamageRange(val min: Float, val max: Float, val element: Element = Physical) {
   def cleanAmount = min.round + "-" + max.round
+  def avg = min + (max - min) / 2
 }

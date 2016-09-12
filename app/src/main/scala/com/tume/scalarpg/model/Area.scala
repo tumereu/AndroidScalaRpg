@@ -31,9 +31,9 @@ object Areas {
     description = Vector("-Boss deals physical damage")
     itemLevel = 1
     types = Vector[EnemyProperty](
-      new EnemyProperty(0, "Green lizard", R.drawable.en_green_lizard, hp=6, mana=0, DamageRange(0,0.5f), 5f, xp=20, size=0.6f),
-      new EnemyProperty(18, "Alligator", R.drawable.en_alligator, hp=12, mana=0, DamageRange(2,3), 7f, xp=50, size=0.75f),
-      new EnemyProperty(45, "Merman brute", R.drawable.en_merfolk_plain, hp=20, mana=0, DamageRange(3,5.5f), 5f, xp=150, size=0.7f)
+      new EnemyProperty(0, "Green lizard", R.drawable.en_green_lizard, hp=6, mana=0, DamageRange(0.5f,1.5f), 4f, xp=20, size=0.6f),
+      new EnemyProperty(18, "Alligator", R.drawable.en_alligator, hp=12, mana=0, DamageRange(5,7), 5f, xp=50, size=0.75f),
+      new EnemyProperty(45, "Merman brute", R.drawable.en_merfolk_plain, hp=50, mana=0, DamageRange(12,20), 4f, xp=150, size=0.7f)
     ).sortBy(_.difficulty)
     floorDrawables = Drawables.floorsSandStone
     wallDrawables = Drawables.wallsStoneBrown
@@ -42,7 +42,7 @@ object Areas {
     wallAmount = 3 -> 5
   },
     new Area() {
-      name = "Castle Ebonwither"
+      name = "Temple dungeon"
       menuImage = R.drawable.dungeon1
       description = Vector("-Some enemies deal arcane damage", "-More traps", "-Boss deals fire & physical damage")
       itemLevel = 10

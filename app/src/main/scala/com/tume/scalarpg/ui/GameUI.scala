@@ -27,11 +27,11 @@ class GameUI extends UIView {
     view += xpBar.pad()
     // Ability and potion buttons
     val potionButton = UIBuilder.panelButton.img(R.drawable.potions).size(0.175f).left(0.05f).below(xpBar).id("potions")
-    val ability0Button = UIBuilder.button.size(0.175f).rightOf(potionButton).alignTop(potionButton).id("ability0")
-    val ability1Button = UIBuilder.button.size(0.175f).below(potionButton).alignLeft(potionButton).id("ability1")
-    val ability2Button = UIBuilder.button.size(0.175f).rightOf(ability1Button).alignTop(ability1Button).id("ability2")
-    val ability3Button = UIBuilder.button.size(0.175f).below(ability1Button).alignLeft(ability1Button).id("ability3")
-    val ability4Button = UIBuilder.button.size(0.175f).rightOf(ability3Button).alignTop(ability3Button).id("ability4")
+    val ability0Button = UIBuilder.button.size(0.175f).rightOf(potionButton).alignTop(potionButton).id("ability_0")
+    val ability1Button = UIBuilder.button.size(0.175f).below(potionButton).alignLeft(potionButton).id("ability_1")
+    val ability2Button = UIBuilder.button.size(0.175f).rightOf(ability1Button).alignTop(ability1Button).id("ability_2")
+    val ability3Button = UIBuilder.button.size(0.175f).below(ability1Button).alignLeft(ability1Button).id("ability_3")
+    val ability4Button = UIBuilder.button.size(0.175f).rightOf(ability3Button).alignTop(ability3Button).id("ability_4")
     view += potionButton.pad(DisplayUtils.scale.toInt)
     view += ability0Button.pad(DisplayUtils.scale.toInt)
     view += ability1Button.pad(DisplayUtils.scale.toInt)
@@ -44,10 +44,10 @@ class GameUI extends UIView {
     val moveBtnSize = 0.15f
     val moveBtnSpace = moveBtnSize / 2
 
-    view += UIBuilder.instantButton.img(R.mipmap.ic_arrow_right).size(moveBtnSize).alignCenter(middlePoint).rightOf(middlePoint, moveBtnSpace).id("moveRight")
-    view += UIBuilder.instantButton.img(R.mipmap.ic_arrow_left).size(moveBtnSize).alignCenter(middlePoint).leftOf(middlePoint, moveBtnSpace).id("moveLeft")
-    view += UIBuilder.instantButton.img(R.mipmap.ic_arrow_up).size(moveBtnSize).alignCenter(middlePoint).above(middlePoint, moveBtnSpace).id("moveUp")
-    view += UIBuilder.instantButton.img(R.mipmap.ic_arrow_down).size(moveBtnSize).alignCenter(middlePoint).below(middlePoint, moveBtnSpace).id("moveDown")
+    view += UIBuilder.button.instant.img(R.mipmap.ic_arrow_right).size(moveBtnSize).alignCenter(middlePoint).rightOf(middlePoint, moveBtnSpace).id("moveRight")
+    view += UIBuilder.button.instant.img(R.mipmap.ic_arrow_left).size(moveBtnSize).alignCenter(middlePoint).leftOf(middlePoint, moveBtnSpace).id("moveLeft")
+    view += UIBuilder.button.instant.img(R.mipmap.ic_arrow_up).size(moveBtnSize).alignCenter(middlePoint).above(middlePoint, moveBtnSpace).id("moveUp")
+    view += UIBuilder.button.instant.img(R.mipmap.ic_arrow_down).size(moveBtnSize).alignCenter(middlePoint).below(middlePoint, moveBtnSpace).id("moveDown")
 
     val potionPanel = new UIPopupPanel()
     val hpPotion = UIBuilder.button.size(0.15f).img(R.drawable.potion_ruby).left(0.05f).alignBottom(healthBar).id("healthPotion")
